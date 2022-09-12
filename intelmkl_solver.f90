@@ -7,7 +7,7 @@
 !  Scripps Institution of Oceanography
 !
  
-include '/home/intel/oneapi/mkl/latest/include/mkl_dss.f90'
+include 'mkl_dss.f90'
     
 module intelmkl_solver
 

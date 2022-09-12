@@ -4,9 +4,9 @@
 ############################## SET YOUR PARAMETERS!!!!! ##################################################
 # Set the number of MPI tasks you want to run
 #SBATCH --nodes=1
-#SBATCH --ntasks=8
-#SBATCH --partition=tsubasa
-#SBATCH --time=1:00:00
+#SBATCH --ntasks=48
+#SBATCH --partition=cei
+#SBATCH --time=24:00:00
 #SBATCH --exclusive
 #SBATCH --job-name=mare2dem-job
 #SBATCH --output=%x_%j.out
@@ -43,7 +43,7 @@ source /home/intel/compilers_and_libraries/linux/bin/compilervars.sh intel64
 
 cd $git_repo
 make clean > compile.out 2> compile.err
-make INCLUDE=./include/omeep_nec.inc NEC_PATH=/opt/nec TRACING=0 ITERATION=1 >> compile.out 2>> compile.err
+make INCLUDE=./include/omeep.inc INTEL_PATH=/home/intel TRACING=1 ITERATION=1 >> compile.out 2>> compile.err
 #. ./configScorep/scorep.cfg 
 #make INCLUDE=./include/omeep.inc PREP=scorep INTEL_PATH=/home/intel/ >> compile.out 2>> compile.err
 

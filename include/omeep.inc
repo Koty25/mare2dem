@@ -34,7 +34,7 @@ endif
    
 # Use the Intel Math Kernel library for the BLASLIB since its highly optimized:
     # sequential version so that MARE's threads don't overload cpu:
-    BLASLIB =  #-L$(MKLROOT)/lib -I$(MKLROOT)/include -lmkl_intel_lp64 -lmkl_core -lmkl_sequential  -lm
+    BLASLIB =  -L$(MKLROOT)/lib -I$(MKLROOT)/include -lmkl_intel_lp64 -lmkl_core -lmkl_sequential  -lm
     
 #  Note that this also assumes that you have correctly installed the Intel compiler so that shell variable MKLROOT 
 #  exists and points to your intel library. You can check this by typing "echo $MKLROOT" into a terminal shell and 

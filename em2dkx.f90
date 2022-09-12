@@ -34,7 +34,7 @@
 !==================================================================================================================================! 
 !======================================================================================================================== em2dkx_mod
 !==================================================================================================================================!  
-!#include <scorep/SCOREP_User.inc>
+#include <scorep/SCOREP_User.inc>
    
     module em2dkx_mod 
 
@@ -608,7 +608,7 @@
     complex(8)                  :: sigx,sigy,sigz,dsds0,dsdeta,dsdtau,dsdc 
     complex(8)                  :: gammay2, gammaz2, expikdx     
 
-    real(8), dimension(3,3)     :: M != (/ 2d0, 1d0, 1d0,   1d0, 2d0, 1d0,   1d0, 1d0, 2d0 /) ! mass matrix, column major order
+    real(8), dimension(3,3)     :: M = [ 2d0, 1d0, 1d0,   1d0, 2d0, 1d0,   1d0, 1d0, 2d0] ! mass matrix, column major order
     
     integer                 :: iComp, isign, isignAdj(2), iq, nq, nrhs,irhs
     real(8)                 :: cosazi,sinazi,cosdip,sindip,sig0
@@ -624,20 +624,6 @@
     
 
     if (lprintDebug_em2dkx) write(*,*) myID,': comp_adj_derivs...'     
-!
-! fill matrix M
-!
-
-M(1,1) = 2d0
-M(1,2) = 1d0
-M(1,3) = 1d0
-M(2,1) = 1d0
-M(2,2) = 2d0
-M(2,3) = 1d0
-M(3,1) = 1d0
-M(3,2) = 1d0
-M(3,3) = 2d0
-
 !
 ! initialize to zero:
 !    

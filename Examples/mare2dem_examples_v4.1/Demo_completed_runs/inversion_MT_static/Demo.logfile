@@ -1,0 +1,346 @@
+Format:     OccamLog.2012.0
+Start time: 08/12/2019 20:04:25.801
+
+  Number of parallel processors:       5
+           Number of input data:    1600
+     Number of model parameters:    7817
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     1 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      22.834           0.0000           5.0000           0.0000           0.0000           66.295           2.1430
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        31.461         0.351
+          11            11        28.517         0.315
+          19            19        23.109         0.219
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      11.546           1.6965           5.0000         -0.10573          0.92576           24.409           5.1970
+ Large misfit decrease detected, ending minimization search. Percent decrease in misfit: 49.43
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        11.55
+                     Roughness:        1.696
+                    Optimal Mu:        5.000
+                      Stepsize:       0.4667
+            Convergence Status:        0
+   # Forward Calls, Cumulative:        2    2
+Iteration Time, Cumulative (s):        98.12            98.12
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        14.049         0.186
+          11            11        16.347         0.215
+          19            19        15.024         0.175
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     2 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      11.546           1.6965           5.0000         -0.10573          0.92576           63.996           2.1790
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      10.743           1.6485           5.0000         -0.84445E-01       1.1023           24.617           5.6250
+      4.5766           5.8043           4.0000         -0.19800           1.8141           21.995           5.8580
+ Large misfit decrease detected, ending minimization search. Percent decrease in misfit: 60.36
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        4.577
+                     Roughness:        5.804
+                    Optimal Mu:        4.000
+                      Stepsize:       0.1377
+            Convergence Status:        0
+   # Forward Calls, Cumulative:        3    5
+Iteration Time, Cumulative (s):        124.3            222.5
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        13.739         0.190
+          11            11        15.669         0.208
+          19            19        15.936         0.180
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     3 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      4.5766           5.8043           4.0000         -0.19800           1.8141           62.762           2.1240
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      4.6097           5.2601           4.0000         -0.19892           1.8740           23.227           6.0370
+      2.1527           12.589           3.0000         -0.26354           2.1399           23.069           5.6910
+ Large misfit decrease detected, ending minimization search. Percent decrease in misfit: 52.96
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        2.153
+                     Roughness:        12.59
+                    Optimal Mu:        3.000
+                      Stepsize:       0.1531
+            Convergence Status:        0
+   # Forward Calls, Cumulative:        3    8
+Iteration Time, Cumulative (s):        122.9            345.5
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        15.279         0.193
+          11            11        16.396         0.208
+          19            19        16.731         0.182
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     4 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      2.1527           12.589           3.0000         -0.26354           2.1399           66.109           2.2970
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      2.0130           12.424           3.0000         -0.26534           2.1944           22.094           5.4160
+      1.4299           24.035           2.0000         -0.38205           2.2659           28.163           6.2530
+ Large misfit decrease detected, ending minimization search. Percent decrease in misfit: 33.57
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        1.430
+                     Roughness:        24.03
+                    Optimal Mu:        2.000
+                      Stepsize:       0.1502
+            Convergence Status:        0
+   # Forward Calls, Cumulative:        3   11
+Iteration Time, Cumulative (s):        130.4            476.0
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        16.256         0.207
+          11            11        16.544         0.216
+          19            19        16.697         0.184
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     5 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      1.4299           24.035           2.0000         -0.38205           2.2659           86.338           2.1220
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.1124           23.759           2.0000         -0.40552           2.4101           27.390           5.5650
+ Large misfit decrease detected, ending minimization search. Percent decrease in misfit: 22.21
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        1.112
+                     Roughness:        23.76
+                    Optimal Mu:        2.000
+                      Stepsize:       0.3733E-01
+            Convergence Status:        0
+   # Forward Calls, Cumulative:        2   13
+Iteration Time, Cumulative (s):        121.5            597.5
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        15.784         0.207
+          11            11        16.006         0.215
+          19            19        16.336         0.184
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     6 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      1.1124           23.759           2.0000         -0.40552           2.4101           76.931           1.9780
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0925           24.156           2.0000         -0.41008           2.3326           33.650           5.3610
+      1.0364           33.905           1.0000         -0.48082           2.3206           38.461           5.2830
+      3.6483           241.88         -0.61803         -0.93299           2.7440           36.686           5.5460
+ ... Finding minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.2562           47.775          0.38197         -0.62641           2.3448           44.164           5.4790
+      1.0101           30.332           1.3820         -0.46066           2.3104           39.887           6.8970
+      1.0153           31.517           1.2438         -0.46817           2.3135           43.963           8.7060
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        1.010
+                     Roughness:        30.33
+                    Optimal Mu:        1.382
+                      Stepsize:       0.8766E-01
+            Convergence Status:        0
+   # Forward Calls, Cumulative:        7   20
+Iteration Time, Cumulative (s):        353.0            950.6
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        15.785         0.211
+          11            11        15.878         0.217
+          19            19        16.205         0.185
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     7 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      1.0101           30.332           1.3820         -0.46066           2.3104           110.06           2.5010
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+     0.99278           30.020           1.3820         -0.45335           2.4099           35.574           6.9390
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:       0.9928
+                     Roughness:        30.02
+                    Optimal Mu:        1.382
+                      Stepsize:       0.3538E-01
+            Convergence Status:        1
+   # Forward Calls, Cumulative:        2   22
+Iteration Time, Cumulative (s):        155.1            1106.
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        15.675         0.210
+          11            11        15.728         0.217
+          19            19        16.083         0.186
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     8 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+     0.99278           30.020           1.3820         -0.45335           2.4099           102.48           2.8570
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+     0.98782           30.483           1.3820         -0.47192           2.3536           31.727           7.3390
+ ... Finding intercept:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.1729           22.376           2.0810         -0.40351           2.3694           31.238           5.3430
+     0.99120           30.048           1.4280         -0.46860           2.3590           32.781           5.3420
+      1.0030           28.930           1.5421         -0.45997           2.3704           31.326           5.2810
+ Intercept is at mu:        1.542
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        1.003
+                     Roughness:        28.93
+                    Optimal Mu:        1.542
+                      Stepsize:       0.1737E-01
+            Convergence Status:        1
+   # Forward Calls, Cumulative:        5   27
+Iteration Time, Cumulative (s):        255.8            1362.
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        15.605         0.210
+          11            11        15.676         0.217
+          19            19        16.038         0.185
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration     9 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      1.0030           28.930           1.5421         -0.45997           2.3704           89.421           1.9510
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0025           28.841           1.5421         -0.45669           2.3999           30.348           5.2220
+
+ Occam iteration completed successfully:
+
+                 Target Misfit:        1.000
+                  Model Misfit:        1.002
+                     Roughness:        28.84
+                    Optimal Mu:        1.542
+                      Stepsize:       0.1037E-01
+            Convergence Status:        1
+   # Forward Calls, Cumulative:        2   29
+Iteration Time, Cumulative (s):        127.0            1489.
+
+ MT static shift estimates:
+      Site #          Name     TE Factor     TM Factor   where linear ApRes = ApRes*Factor
+           3             3        15.578         0.210
+          11            11        15.654         0.216
+          19            19        16.008         0.185
+-----------------------------------------------------------------------------------------------------------------------
+** Iteration    10 **
+
+ Constructing derivative dependent matrices...
+ ... Forming matrix products...
+ ... Starting model and matrix assembly:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)    Jacobian (s)    Matrix Ops. (s)
+      1.0025           28.841           1.5421         -0.45669           2.3999           87.612           2.0010
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0029           28.933           1.5421         -0.46518           2.3783           35.612           5.2830
+ Cutting step size due to model roughness, new step size is:       0.5000
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0026           28.869           1.5421         -0.46094           2.3891           28.753           5.3110
+ Cutting step size due to model roughness, new step size is:       0.2500
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0034           28.850           1.5421         -0.45882           2.3945           31.502           5.2170
+ Cutting step size due to model roughness, new step size is:       0.1250
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0028           28.845           1.5421         -0.45775           2.3972           27.144           5.1810
+ Cutting step size due to model roughness, new step size is:       0.6250E-01
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0022           28.843           1.5421         -0.45722           2.3986           30.803           5.4570
+ Cutting step size due to model roughness, new step size is:       0.3125E-01
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0021           28.842           1.5421         -0.45696           2.3993           30.010           5.1260
+ Cutting step size due to model roughness, new step size is:       0.1562E-01
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0015           28.841           1.5421         -0.45682           2.3996           30.940           5.1070
+ Cutting step size due to model roughness, new step size is:       0.7812E-02
+ Searching Lagrange multiplier...
+ ... Bracketing minimum:
+     Misfit         Roughness        Log10(mu)      Min log10(rho)   Max log10(rho)     Fwd Call (s)   Matrix Ops. (s)
+      1.0024           28.841           1.5421         -0.45676           2.3998           29.645           5.0640
+ Roughness not decreased by using small steps, giving up.
+
+ Model roughness can not be decreased further, stopping.
+
+                      End time: 08/12/2019 20:35:30.453
+ Total time for all iterations:        1865.

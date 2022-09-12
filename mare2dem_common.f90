@@ -602,12 +602,8 @@
             RxTxGroups(iGroup)%nTx  = ntxg
             
             allocate( RxTxGroups(iGroup)%iTx(ntxg) )
-
-            do i =1,ntxg
-                RxTxGroups(iGroup)%iTx(i) = i + nt0
-            enddo
  
-            !RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
+            RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
              
             
             !
@@ -616,12 +612,8 @@
             RxTxGroups(iGroup)%nRx  = nrxg
             
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
-
-            do i =1,nrxg
-                RxTxGroups(iGroup)%iRx(i) = i + nrx0
-            enddo
             
-            !RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
+            RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
  
         enddo
     enddo
@@ -652,12 +644,8 @@
             !
             RxTxGroups(iGroup)%nRx      = nrxg
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
-
-            do i =1,nrxg
-                RxTxGroups(iGroup)%iRx(i) = i + nrx0
-            enddo
                 
-            !RxTxGroups(iGroup)%iRx      =  [1:nrxg] + nrx0  
+            RxTxGroups(iGroup)%iRx      =  [1:nrxg] + nrx0  
                       
                         
         enddo
@@ -691,12 +679,8 @@
             RxTxGroups(iGroup)%nTx  = ntxg
             
             allocate( RxTxGroups(iGroup)%iTx(ntxg) )
-
-            do i =1,ntxg
-                RxTxGroups(iGroup)%iTx(i) = i + nt0
-            enddo
  
-            !RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
+            RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
              
                                    
             !
@@ -705,12 +689,8 @@
             RxTxGroups(iGroup)%nRx  = nrxg
             
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
-
-            do i =1,nrxg
-                RxTxGroups(iGroup)%iRx(i) = i + nrx0
-            enddo
             
-            !RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
+            RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
             
             
             ! New:

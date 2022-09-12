@@ -1,4 +1,4 @@
-!#include <scorep/SCOREP_User.inc>
+#include <scorep/SCOREP_User.inc>
 
     program runMARE2DEM
  

@@ -28,7 +28,7 @@
 !
 ! Module for various data transformations
 !
-!#include <scorep/SCOREP_User.inc>
+#include <scorep/SCOREP_User.inc>
 
     module dataTransformations
     
@@ -1314,36 +1314,13 @@
     
     integer :: isite,itrans,icomp,iPass, nc,nc0, ict
     
-    real(8), dimension(3,6)     :: V !=[1,0,0, 0,1,0, 0,0,1, 1,0,0, 0,1,0, 0,0,1]
+    real(8), dimension(3,6)     :: V =[1,0,0, 0,1,0, 0,0,1, 1,0,0, 0,1,0, 0,0,1]
     real(8)                     :: vec(3), theta, alpha, beta           ! site rotation angles
     real(8) , dimension(3,3)    :: RotR 
  
     integer, dimension(:), allocatable :: iG2LTx
   
     if (allocated(Components))  deallocate(Components)
-
-!
-! fill matrix V
-!
-
-V(1,1) = 1
-V(1,2) = 0
-V(1,3) = 0
-V(1,4) = 0
-V(1,5) = 1
-V(1,6) = 0
-V(2,1) = 0
-V(2,2) = 0
-V(2,3) = 1
-V(2,4) = 1
-V(2,5) = 0
-V(2,6) = 0
-V(3,1) = 0
-V(3,2) = 1
-V(3,3) = 0
-V(3,4) = 0
-V(3,5) = 0
-V(3,6) = 1
  
 !
 ! Array of transmitters for requested data:

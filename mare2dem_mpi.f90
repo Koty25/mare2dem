@@ -24,7 +24,7 @@
 !==================================================================================================================================! 
 !============================================================================================================ mare2d_mpi_definitions
 !==================================================================================================================================!
-!#include <scorep/SCOREP_User.inc>
+#include <scorep/SCOREP_User.inc>
 
     module mare2d_mpi_definitions
 
@@ -551,10 +551,7 @@
 
         else
             allocate(iFreeInd(nFree))
-            do i =1,nFree
-                iFreeInd(i) = i
-            enddo
-            !iFreeInd(1:nFree) = [1:nFree]
+            iFreeInd(1:nFree) = [1:nFree]
             nFreeRecv = nFree
         endif
        
