@@ -1,0 +1,21 @@
+Occam
+	jacobianCompute
+	smoothingOccam	
+
+
+iprobeMpiManager
+mpi_worker_control
+	iprobeMpi
+	
+
+
+compute
+	primal_solve
+	error_estimate
+	derivs_comp_adj
+	lhs_gen
+	em2dkx_localRefinement
+FourierDeriv
+
+iteration
+

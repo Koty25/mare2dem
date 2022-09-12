@@ -9,9 +9,10 @@
 !
 
 ! DGM 2/23/2012 For Windows compilation
-#IF DEFINED(_WIN32) .OR. DEFINED(_WIN64)
-#DEFINE c_fortran_zgssv c_fortran_zgssv_
-#ENDIF
+!#IF DEFINED(_WIN32) .OR. DEFINED(_WIN64)
+!#DEFINE c_fortran_zgssv
+!#DEFINE c_fortran_zgssv c_fortran_zgssv_
+!#ENDIF
 
 module superlu_zsolver
  
@@ -62,7 +63,7 @@ module superlu_zsolver
 !
 ! Call superlu c-fortran interface to do factorization:
 !
-    call c_fortran_zgssv( 1, n, nz,  , Az, Ai, Ap,   ,  , this%factors, info )
+    call c_fortran_zgssv(1, n, nz, 1 , Az, Ai, Ap, 1 , 1 , this%factors, info)
     
     if (info .eq. 0) then
         this%error = 0
@@ -96,7 +97,7 @@ module superlu_zsolver
     
     nrhs = ubound(b,2)
  
-    call c_fortran_zgssv( 2, n, n , nrhs,  ,  ,  ,  b, n, this%factors, info )
+    call c_fortran_zgssv(2, n, n, nrhs, 1 , 1 , 1 , b, n, this%factors, info)
     
     if (info .eq. 0) then
         this%error = 0
@@ -119,7 +120,7 @@ module superlu_zsolver
 !
 ! Free numeric factorization memory:
 !
-    call c_fortran_zgssv( 3,  ,   ,  ,  ,  ,  ,   ,  , this%factors, info )
+    call c_fortran_zgssv( 3, 1 , 1 , 1 , 1 , 1 , 1 , 1 , 1 , this%factors, info)
     
     if (info .eq. 0) then
         this%error = 0

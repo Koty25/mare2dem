@@ -1,0 +1,12 @@
+'ScaLAPACK, P?POTRF_DRIVER input file'
+2			NOUT, device out (must not be equal 1)
+'U'			UPLO, whether upper or lower matrix triangle is used (must be 'U' or 'L')
+3.0E+0			threshold (set 0.0E+0  to switch off residual checking)
+10			time iterations
+3			NN, number of matrix dimentions N
+40 100 200		values of N
+3			NNB, number of block dimentions NB
+10 15 20		values of NB
+3			number of process grids (ordered pairs of P and Q)
+1 2 4			values of P
+4 2 1			values of Q

@@ -49,6 +49,8 @@
 !==================================================================================================================================! 
 !===================================================================================================================== Occam Module
 !==================================================================================================================================! 
+!#include <scorep/SCOREP_User.inc>
+
     module Occam
 
 #if defined (_WIN32) || defined (WIN32) || defined (_WIN64) || defined (WIN64)
@@ -338,6 +340,14 @@
     character(128)  :: cStr   
     real(RealPrec)  :: targetRMS_input 
  
+#ifdef TRACE
+	SCOREP_USER_REGION_DEFINE(Occam)
+	SCOREP_USER_REGION_DEFINE(smoothingOccam)
+	SCOREP_USER_REGION_DEFINE(jacobianCompute)
+	SCOREP_USER_REGION_BEGIN( Occam, "Occam", SCOREP_USER_REGION_TYPE_COMMON)
+#endif
+ 
+ 
 !
 ! Say hello and initialize a few quantities
 !        
@@ -347,7 +357,17 @@
 ! Compute forward response and Jacobian matrix, also allocate arrays
 ! used in the model update equations during Occam's lagrange multiplier search:
 !
-    call computeJacobian(lSaveJacobian,lSaveSensitivity) 
+
+#ifdef TRACE
+
+	SCOREP_USER_REGION_BEGIN( jacobianCompute, "jacobianCompute", SCOREP_USER_REGION_TYPE_COMMON)
+#endif
+
+    call computeJacobian(lSaveJacobian,lSaveSensitivity)
+    
+#ifdef TRACE
+    SCOREP_USER_REGION_END(jacobianCompute)
+#endif  
     
 ! 
 ! Save the starting model response if this is the first call:
@@ -368,6 +388,10 @@
         endif
         
     endif
+
+#ifdef TRACE
+	SCOREP_USER_REGION_BEGIN( smoothingOccam, "smoothingOccam", SCOREP_USER_REGION_TYPE_COMMON)
+#endif
 
 !
 ! Is the starting model at the target RMS already? If so, let the smoothing begin.
@@ -505,6 +529,10 @@
         if ( modelRMS > targetRMS + rmsTol ) convergenceFlag = 0
     endif
    
+#ifdef TRACE
+    SCOREP_USER_REGION_END(smoothingOccam)
+#endif 
+   
 !
 ! Print out some summary information:
 ! 
@@ -513,7 +541,11 @@
 !
 ! Deallocate working arrays:
 !        
-    call deallocateOccamIteration    
+    call deallocateOccamIteration  
+    
+#ifdef TRACE
+    SCOREP_USER_REGION_END(Occam)
+#endif  
     
     end subroutine computeOccamIteration
 
@@ -525,6 +557,14 @@
 ! Computes the forward response and Jacobian matrix for the input model at the start of an Occam iteration.
 ! Inserts these into various arrays required by the Occam model update equations.
 !
+
+!
+! Instrumentation Occam
+!
+
+    !computeOccamIteration
+
+
     logical, intent(in)         :: lSaveJacobian,lSaveSensitivity ! set to true to output sensitivity and Jacobian arrays    
 
 !
@@ -534,6 +574,8 @@
     integer                     :: i, ierr
     real(RealPrec)              :: beta, t0, t1, t2, minv, maxv
     character(128)              :: cStr
+
+
 
            
 !
@@ -654,6 +696,9 @@
     call printOccamLog(cStr)
     write(cStr,'(7(g16.5,1x))')  startingRMS , startingRoughness, modelMu,  minv, maxv, t1, t2 
     call printOccamLog(cStr)
+    
+    !end instrumentation
+
                 
     end subroutine computeJacobian   
 

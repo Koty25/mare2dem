@@ -56,12 +56,12 @@
 ! Variables that can be changed using optional inputs in the settings file:
 !
     logical         :: lprintDecomposition     = .true.   ! set to true to display the parallel decomposition settings                                            
-    logical         :: lprintMPItimers         = .false.  ! set to true to display timing info on MPI send and recv commands
-    logical         :: lPrintDebug             = .false.   
-    logical         :: lPrintSetup             = .false.   
-    logical         :: lPrintGroups            = .false.   ! prints all Fq, RxTx, Refinement and KxFq groups for debugging
-    logical         :: lSaveLoadBalanceTimers  = .false.   ! saves loadBalanceTimers.txt with load timers for each worker process    
-    logical         :: lSaveTaskTimers         = .false.   ! saves TaskTimer.txt with timers for each task   
+    logical         :: lprintMPItimers         = .true.  ! set to true to display timing info on MPI send and recv commands
+    logical         :: lPrintDebug             = .true.   
+    logical         :: lPrintSetup             = .true.   
+    logical         :: lPrintGroups            = .true.   ! prints all Fq, RxTx, Refinement and KxFq groups for debugging
+    logical         :: lSaveLoadBalanceTimers  = .true.   ! saves loadBalanceTimers.txt with load timers for each worker process    
+    logical         :: lSaveTaskTimers         = .true.   ! saves TaskTimer.txt with timers for each task   
     logical         :: lPrintData              = .true.    ! display data file when read in
     logical         :: lPrintBanner            = .true.    ! display banner at start
     
@@ -602,8 +602,12 @@
             RxTxGroups(iGroup)%nTx  = ntxg
             
             allocate( RxTxGroups(iGroup)%iTx(ntxg) )
+
+            do i =1,ntxg
+                RxTxGroups(iGroup)%iTx(i) = i + nt0
+            enddo
  
-            RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
+            !RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
              
             
             !
@@ -612,8 +616,12 @@
             RxTxGroups(iGroup)%nRx  = nrxg
             
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
+
+            do i =1,nrxg
+                RxTxGroups(iGroup)%iRx(i) = i + nrx0
+            enddo
             
-            RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
+            !RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
  
         enddo
     enddo
@@ -644,8 +652,12 @@
             !
             RxTxGroups(iGroup)%nRx      = nrxg
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
+
+            do i =1,nrxg
+                RxTxGroups(iGroup)%iRx(i) = i + nrx0
+            enddo
                 
-            RxTxGroups(iGroup)%iRx      =  [1:nrxg] + nrx0  
+            !RxTxGroups(iGroup)%iRx      =  [1:nrxg] + nrx0  
                       
                         
         enddo
@@ -679,8 +691,12 @@
             RxTxGroups(iGroup)%nTx  = ntxg
             
             allocate( RxTxGroups(iGroup)%iTx(ntxg) )
+
+            do i =1,ntxg
+                RxTxGroups(iGroup)%iTx(i) = i + nt0
+            enddo
  
-            RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
+            !RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
              
                                    
             !
@@ -689,8 +705,12 @@
             RxTxGroups(iGroup)%nRx  = nrxg
             
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
+
+            do i =1,nrxg
+                RxTxGroups(iGroup)%iRx(i) = i + nrx0
+            enddo
             
-            RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
+            !RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
             
             
             ! New:
@@ -1153,7 +1173,11 @@
  !
  ! Generate the data mask arrays which indicate which Rx,Tx,Freq combos have input data:
  !
+     write(*,*) 'antes nd: ',nd
+
      call getDataMasks
+
+     write(*,*) 'depois nd: ',nd
      
  !
  ! Use a first pass to count how many groups to allocate, then we use a second pass to allocate and insert:
@@ -1257,11 +1281,15 @@
 ! Point to first group:
 !
     iPtr_refGroups = 1
+
+    write(*,*) 'nd aqui1: ',nd
     
 !
 ! Lastly, create the local dp arrays for each refinement group:
 !    
     allocate( g2L_iFq(max(nFreqCSEM,nFreqMT,1)), g2L_iTx(max(nTxCSEM,nTxDC)), g2L_iRx(max(nRxCSEM,nRxMT,nRxDC)) )
+
+    write(*,*) 'nd aqui2: ',nd
 
     do iGrp = 1,nRefinementGroups
     
@@ -1281,9 +1309,9 @@
         fq0     = FqGroups(iFqG)%iFq(1)
         fq1     = FqGroups(iFqG)%iFq(nFq)
         
-!        write(*,'(a,*(i,1x))') ' nRx,rx0,rx1: ', nRx,rx0,rx1
-!        write(*,'(a,*(i,1x))') ' nTx,tx0,tx1: ', nTx,tx0,tx1
-!        write(*,'(a,*(i,1x))') ' nFq,fq0,fq1: ', nFq,fq0,fq1
+        write(*,'(a,*(i,1x))') ' nRx,rx0,rx1: ', nRx,rx0,rx1
+        write(*,'(a,*(i,1x))') ' nTx,tx0,tx1: ', nTx,tx0,tx1
+        write(*,'(a,*(i,1x))') ' nFq,fq0,fq1: ', nFq,fq0,fq1
 
         ! Get global to local mappings:
         g2L_iFq = 0
@@ -1338,6 +1366,12 @@
  
             ! Count number of input data for this group:
             ndCount = 0
+            write(*,*) 'fq0: ',fq0
+            write(*,*) 'fq1: ',fq1
+            write(*,*) 'tx0: ',tx0
+            write(*,*) 'tx1: ',tx1
+            write(*,*) 'rx0: ',rx0
+            write(*,*) 'rx1: ',rx1
             do iD = 1,nd
                 if ( (between(dp(iD,2),fq0,fq1)) .and. &
                    & (between(dp(iD,3),tx0,tx1)) .and. & 
@@ -1345,6 +1379,8 @@
                    if  (dp(iD,1)<100)  ndCount = ndCount + 1
                 endif
             enddo
+            write(*,*) 'Ver ndCount: ',ndCount
+            write(*,*) 'nd: ',nd
                     
         elseif (refinementGroups(iGrp)%sType == 'dc' ) then
  

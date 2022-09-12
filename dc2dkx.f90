@@ -293,10 +293,24 @@
     real(8)         :: ye(3),ze(3),a(3),b(3),c(3),area,l(3),dldy(3), dldz(3) 
     real(8)         :: sxx, syy, szz, vp(3),dvpdy,dvpdz,va(3),dvady,dvadz, sigx,sigy,sigz
 
-    real(8), dimension(3,3)     :: M = [ 2d0, 1d0, 1d0,   1d0, 2d0, 1d0,   1d0, 1d0, 2d0] ! mass matrix, column major order
+    real(8), dimension(3,3)     :: M != [ 2d0, 1d0, 1d0,   1d0, 2d0, 1d0,   1d0, 1d0, 2d0] ! mass matrix, column major order
     
      
-    if (lprintDebug_dc2dkx) write(*,*) myID,': comp_adj_derivs...'     
+    if (lprintDebug_dc2dkx) write(*,*) myID,': comp_adj_derivs...'
+!
+! fill matrix M
+!
+
+M(1,1) = 2d0
+M(1,2) = 1d0
+M(1,3) = 1d0
+M(2,1) = 1d0
+M(2,2) = 2d0
+M(2,3) = 1d0
+M(3,1) = 1d0
+M(3,2) = 1d0
+M(3,3) = 2d0
+         
 !
 ! initialize to zero:
 !    

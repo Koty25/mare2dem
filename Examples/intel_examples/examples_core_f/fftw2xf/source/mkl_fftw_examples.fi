@@ -1,0 +1,56 @@
+!===============================================================================
+! Copyright 2006-2020 Intel Corporation.
+!
+! This software and the related documents are Intel copyrighted  materials,  and
+! your use of  them is  governed by the  express license  under which  they were
+! provided to you (License).  Unless the License provides otherwise, you may not
+! use, modify, copy, publish, distribute,  disclose or transmit this software or
+! the related documents without Intel's prior written permission.
+!
+! This software and the related documents  are provided as  is,  with no express
+! or implied  warranties,  other  than those  that are  expressly stated  in the
+! License.
+!===============================================================================
+
+      REAL*8 MAX_DOUBLE_ERR
+      PARAMETER (MAX_DOUBLE_ERR=1.0D-11)
+
+      REAL*4 MAX_SINGLE_ERR
+      PARAMETER (MAX_SINGLE_ERR=1.0E-5)
+
+      external FFTW_F77
+      external FFTW_F77_THREADS_ONE
+      external FFTW_F77_THREADS
+      external FFTW_F77_CREATE_PLAN
+      external FFTW2D_F77_CREATE_PLAN
+      external FFTW_F77_DESTROY_PLAN
+      external FFTWND_F77_ONE
+      external FFTWND_F77_DESTROY_PLAN
+      external FFTWND_F77
+      external FFTWND_F77_THREADS_ONE
+      external FFTWND_F77_THREADS
+      external FFTW_F77_THREADS_INIT
+      external FFTW_F77_ONE
+      external FFTW3D_F77_CREATE_PLAN
+      external RFFTWND_F77_CREATE_PLAN
+      external RFFTW2D_F77_CREATE_PLAN
+      external RFFTW3D_F77_CREATE_PLAN
+      external RFFTWND_F77_DESTROY_PLAN
+      external RFFTWND_F77_ONE_REAL_TO_COMPLEX
+      external RFFTWND_F77_ONE_COMPLEX_TO_REAL
+      external RFFTWND_F77_REAL_TO_COMPLEX
+      external RFFTWND_F77_COMPLEX_TO_REAL
+      external RFFTWND_F77_THREADS_ONE_REAL_TO_COMPLEX
+      external RFFTWND_F77_THREADS_ONE_COMPLEX_TO_REAL
+      external RFFTWND_F77_THREADS_REAL_TO_COMPLEX
+      external RFFTWND_F77_THREADS_COMPLEX_TO_REAL
+      external CHECK_RESULT_S
+      external CHECK_RESULT_C
+      external CHECK_RESULT_D
+      external CHECK_RESULT_Z
+      external INIT_COMPLEX_VECTOR_C
+      external INIT_COMPLEX_VECTOR_Z
+      external SCALE_WITH_STRIDES_C
+      external SCALE_WITH_STRIDES_S
+      external SCALE_WITH_STRIDES_D
+      external SCALE_WITH_STRIDES_Z

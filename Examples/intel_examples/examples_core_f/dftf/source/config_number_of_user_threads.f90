@@ -1,0 +1,203 @@
+!===============================================================================
+! Copyright 2011-2020 Intel Corporation.
+!
+! This software and the related documents are Intel copyrighted  materials,  and
+! your use of  them is  governed by the  express license  under which  they were
+! provided to you (License).  Unless the License provides otherwise, you may not
+! use, modify, copy, publish, distribute,  disclose or transmit this software or
+! the related documents without Intel's prior written permission.
+!
+! This software and the related documents  are provided as  is,  with no express
+! or implied  warranties,  other  than those  that are  expressly stated  in the
+! License.
+!===============================================================================
+
+! Content:
+! An example of using DFTI_NUMBER_OF_USER_THREADS configuration parameter.
+! The parameter specifies how many user threads (OS threads or OpenMP threads)
+! share the descriptor for computation of FFT.
+!
+! Values:
+! Any positive integer (default 1)
+!
+!*****************************************************************************
+program config_number_of_user_threads
+
+  use MKL_DFTI, forget => DFTI_DOUBLE, DFTI_DOUBLE => DFTI_DOUBLE_R
+
+  ! Sizes of 3D transform
+  integer, parameter :: N1 = 16
+  integer, parameter :: N2 = 16
+  integer, parameter :: N3 = 16
+
+  ! Number of transforms
+  integer, parameter :: M = 100
+
+  ! Arbitrary harmonic used to test the FFT
+  integer, parameter :: H1 = 35
+  integer, parameter :: H2 = 2
+  integer, parameter :: H3 = 3
+
+  ! Number of user threads sharing the descriptor
+  integer, parameter :: NUT = 4
+
+  ! Need double precision
+  integer, parameter :: WP = selected_real_kind(15,307)
+
+  ! Execution status
+  integer :: status = 0, ignored_status
+
+  ! DFTI descriptor handle
+  type(DFTI_DESCRIPTOR), POINTER :: hand
+
+  ! Data array
+  complex(WP), allocatable :: x (:,:,:,:)
+
+  ! Thread private temporary variables
+  integer i, thr_status
+
+  print *,"Example config_number_of_user_threads"
+  print *,"Multiple 3D FFT computed by threads sharing a descriptor"
+  print *,"Configuration parameters:"
+  print '(" DFTI_PRECISION              = DFTI_DOUBLE")'
+  print '(" DFTI_FORWARD_DOMAIN         = DFTI_COMPLEX")'
+  print '(" DFTI_DIMENSION              = 3")'
+  print '(" DFTI_LENGTHS                = /"I0","I0","I0"/" )', N1, N2, N3
+  print '(" DFTI_NUMBER_OF_USER_THREADS = "I0)', NUT
+  print '(" Number of transforms        = "I0)', M
+
+  print *,"Allocate data array"
+  allocate ( x(N1, N2, N3, M), STAT = status)
+  if (0 /= status) goto 999
+
+  print *,"Create DFTI descriptor"
+  status = DftiCreateDescriptor(hand, DFTI_DOUBLE, DFTI_COMPLEX, 3, [N1,N2,N3])
+  if (0 /= status) goto 999
+
+  print *,"Set number of user threads"
+  status = DftiSetValue(hand, DFTI_NUMBER_OF_USER_THREADS, NUT)
+  if (0 /= status) goto 999
+
+  print *,"Commit DFTI descriptor"
+  status = DftiCommitDescriptor(hand)
+  if (0 /= status) goto 999
+
+  print *,"Initialize input for forward transform"
+  call init(x, N1, N2, N3, M, H1, H2, H3)
+
+  print *,"Compute forward transforms by parallel user threads"
+!$OMP PARALLEL DO SHARED(x,hand) PRIVATE(i,thr_status)
+  do i = 1, M
+
+    ! If the actual size of parallel team of threads sharing 'hand' is
+    ! greater than 'NUT', the number of user threads set in the
+    ! descriptor, then the performance may be negatively affected.
+
+    thr_status = DftiComputeForward(hand, x(:, 1, 1, i))
+
+    ! Update global status only if this thread fails
+    if (thr_status /= 0) status = thr_status
+
+  end do
+!$OMP END PARALLEL DO
+  if (0 /= status) goto 999
+
+  print *,"Verify the result"
+  status = verificate(x, N1, N2, N3, M, H1, H2, H3)
+  if (0 /= status) goto 999
+
+100 continue
+
+  print *,"Release the DFTI descriptor"
+  ignored_status = DftiFreeDescriptor(hand)
+
+  if (allocated(x)) then
+      print *,"Deallocate data array"
+      deallocate(x)
+  endif
+
+  if (status == 0) then
+    print *,"TEST PASSED"
+    call exit(0)
+  else
+    print *,"TEST FAILED"
+    call exit(1)
+  endif
+
+999 print '("  Error, status = ",I0)', status
+  goto 100
+
+contains
+
+  ! Compute mod(K*L,M) accurately
+  pure real(WP) function moda(k,l,m)
+    integer, intent(in) :: k,l,m
+    integer*8 :: k8
+    k8 = k
+    moda = real(mod(k8*l,m),WP)
+  end function moda
+
+  ! Initialize arrays with harmonic /H1, H2, H3/
+  subroutine init(x, N1, N2, N3, M, H1, H2, H3)
+    integer N1, N2, N3, M, H1, H2, H3
+    complex(WP) :: x(:,:,:,:)
+
+    integer k1, k2, k3, mm
+    complex(WP), parameter :: I_TWOPI = (0.0_WP,6.2831853071795864769_WP)
+
+    forall (k1=1:N1, k2=1:N2, k3=1:N3, mm=1:M)
+      x(k1,k2,k3,mm) = exp( I_TWOPI * ( &
+    &    moda(  k1-1,H1, N1)/N1 &
+    &    + moda(k2-1,H2, N2)/N2 &
+    &    + moda(k3-1,H3, N3)/N3 )) / (N1*N2*N3)
+    end forall
+  end subroutine init
+
+  ! Verify that x(:,:,:,mm) are unit peaks at /H1, H2, H3/
+  integer function verificate(x, N1, N2, N3, M, H1, H2, H3)
+    integer N1, N2, N3, M, H1, H2, H3
+    complex(WP) :: x(:,:,:,:)
+
+    integer k1, k2, k3, mm
+    real(WP) err, errthr, maxerr
+    complex(WP) res_exp, res_got
+
+    ! Note, this simple error bound doesn't take into account error of
+    ! input data
+    errthr = 5.0 * log(real(N1*N2*N3,WP)) / log(2.0_WP) * EPSILON(1.0_WP)
+    print '("  Check if err is below errthr " G10.3)', errthr
+
+    maxerr = 0.0_WP
+    do mm = 1, M
+      do k3 = 1, N3
+        do k2 = 1, N2
+          do k1 = 1, N1
+            if (mod(k1-1-H1, N1)==0 .AND.                                &
+    &          mod  (k2-1-H2, N2)==0 .AND.                                &
+    &          mod  (k3-1-H3, N3)==0) then
+              res_exp = 1.0_WP
+            else
+              res_exp = 0.0_WP
+            end if
+            res_got = x(k1,k2,k3,mm)
+            err = abs(res_got - res_exp)
+            maxerr = max(err,maxerr)
+            if (.not.(err < errthr)) then
+              print '("  x("I0","I0","I0", "I0"):"$)', k1, k2, k3, mm
+              print '(" expected ("G24.17","G24.17"),"$)', res_exp
+              print '(" got ("G24.17","G24.17"),"$)', res_got
+              print '(" err "G10.3)', err
+              print *," Verification FAILED"
+              verificate = 100
+              return
+            end if
+          end do
+        end do
+      end do
+    end do
+    print '("  Verified,  maximum error was " G10.3)', maxerr
+    verificate = 0
+  end function verificate
+
+end program config_number_of_user_threads
+

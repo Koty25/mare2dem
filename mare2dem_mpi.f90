@@ -24,6 +24,8 @@
 !==================================================================================================================================! 
 !============================================================================================================ mare2d_mpi_definitions
 !==================================================================================================================================!
+!#include <scorep/SCOREP_User.inc>
+
     module mare2d_mpi_definitions
 
 #if defined(__INTEL_COMPILER)
@@ -77,6 +79,10 @@
     
     integer :: ierr,  iWorker, nProc 
 
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(iprobeMpiManager)
+#endif
+
     call mpi_comm_size( mcomm, nProc, ierr )  
          
 !
@@ -95,6 +101,11 @@
 !
 ! Launch the manager controller:
 !
+
+#ifdef TRACE
+    SCOREP_USER_REGION_BEGIN( iprobeMpiManager, "iprobeMpiManager", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif
+
     do    
                 
         status = 0
@@ -102,8 +113,14 @@
         !
         ! Check for a message from any Worker:
         !
+
+#ifdef TRACE
+            SCOREP_RECORDING_OFF()
+#endif
         call  mpi_iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, mcomm, lflag, status, ierr)
-        
+#ifdef TRACE
+            SCOREP_RECORDING_ON()
+#endif        
         !
         ! If message from Worker, then decode it:
         !
@@ -148,6 +165,11 @@
      
         
     enddo ! manager controller loop
+
+#ifdef TRACE    
+    SCOREP_USER_REGION_END(iprobeMpiManager) !end Instrumentation
+#endif
+
 !        
 ! Done with the adaptive mesh refinements 
 !
@@ -529,7 +551,10 @@
 
         else
             allocate(iFreeInd(nFree))
-            iFreeInd(1:nFree) = [1:nFree]
+            do i =1,nFree
+                iFreeInd(i) = i
+            enddo
+            !iFreeInd(1:nFree) = [1:nFree]
             nFreeRecv = nFree
         endif
        
@@ -592,7 +617,17 @@
     !
     ! Determine which worker I am:
     !
+    
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(mpi_worker_control)
+    SCOREP_USER_REGION_DEFINE(iprobeMpi)	
+#endif
+    
     call mpi_comm_rank( mcomm, myID, ierr )
+
+#ifdef TRACE
+    SCOREP_USER_REGION_BEGIN( mpi_worker_control, "mpi_worker_control", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif
     
     !
     ! Create an infinite loop for this worker controller:
@@ -608,7 +643,17 @@
         !
         ! Check for a message from the manager:
         !
+        
+#ifdef TRACE
+       SCOREP_RECORDING_OFF()       
+    SCOREP_USER_REGION_BEGIN( iprobeMpi, "iprobeMpi", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif
         call  mpi_iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, mcomm, lflag, status, ierr)
+
+#ifdef TRACE    
+    SCOREP_USER_REGION_END(iprobeMpi) !end Instrumentation
+       SCOREP_RECORDING_ON()
+#endif
         
         !
         ! If no message from the manager, take a valium and try later:
@@ -617,6 +662,9 @@
             call sleepqq(1) ! kwk debug: this is specific to the intel compiler
             cycle
         endif
+
+
+
 #endif        
         !
         ! Get the command from the manager:
@@ -665,6 +713,10 @@
         end select
 
     enddo   ! the infinite while loop
+    
+#ifdef TRACE    
+    SCOREP_USER_REGION_END( mpi_worker_control ) !end Instrumentation
+#endif
     
     end subroutine mpi_worker_controller
     

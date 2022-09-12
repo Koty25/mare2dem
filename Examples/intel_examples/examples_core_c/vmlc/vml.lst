@@ -1,0 +1,49 @@
+#===============================================================================
+# Copyright 2003-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+VML =                                                                          \
+      vssin vdsin vscos vdcos vstan vdtan vssincos vdsincos                    \
+      vsexp vdexp vsln vdln vslog10 vdlog10 vspow vdpow vssqrt vdsqrt          \
+      vspowx vdpowx vscbrt vdcbrt vsinvsqrt vdinvsqrt                          \
+      vsinvcbrt vdinvcbrt vsinv vdinv vsdiv vddiv vserf vderf                  \
+      vssinh vdsinh vscosh vdcosh vstanh vdtanh vserfc vderfc                  \
+      vsasinh vdasinh vsacosh vdacosh vsatanh vdatanh                          \
+      vsasin vdasin vsacos vdacos vsatan vdatan vsatan2 vdatan2                \
+      vshypot vdhypot vserfinv vderfinv vserfcinv vderfcinv                    \
+      vscdfnorm vdcdfnorm vscdfnorminv vdcdfnorminv                            \
+      vsfloor vdfloor vsceil vdceil vstrunc vdtrunc vsround vdround            \
+      vsrint vdrint vsnearbyint vdnearbyint vsmodf vdmodf vsfrac vdfrac        \
+      vspacki vdpacki vspackv vdpackv vspackm vdpackm                          \
+      vcpacki vzpacki vcpackv vzpackv vcpackm vzpackm                          \
+      vsunpacki vdunpacki vsunpackv vdunpackv vsunpackm vdunpackm              \
+      vcunpacki vzunpacki vcunpackv vzunpackv vcunpackm vzunpackm              \
+      vssub vsadd vsmul vsabs vssqr vslog1p vspow3o2 vspow2o3 vsexpm1          \
+      vdsub vdadd vdmul vdabs vdsqr vdlog1p vdpow3o2 vdpow2o3 vdexpm1          \
+      vcsin vzsin vccos vzcos vctan vztan                                      \
+      vcexp vzexp vcln vzln vclog10 vzlog10 vcpow vzpow vcsqrt vzsqrt          \
+      vcpowx vzpowx                                                            \
+      vcsinh vzsinh vccosh vzcosh vctanh vztanh                                \
+      vcasinh vzasinh vcacosh vzacosh vcatanh vzatanh                          \
+      vcasin vzasin vcacos vzacos vcatan vzatan                                \
+      vcsub vcadd vcmul vcabs vcdiv vcconj vcmulbyconj vccis vcarg             \
+      vzsub vzadd vzmul vzabs vzdiv vzconj vzmulbyconj vzcis vzarg             \
+      vslgamma vdlgamma vstgamma vdtgamma                                      \
+      vdexpint1 vsexpint1                                                      \
+      vdacospi vdasinpi vdatan2pi vdatanpi vdcopysign vdcosd vdcospi vdexp10   \
+      vdexp2 vdfdim vdfmax vdfmin vdfmod vdlog2 vdlogb vdmaxmag vdminmag       \
+      vdnextafter vdpowr vdremainder vdsind vdsinpi vdtand vdtanpi vsacospi    \
+      vsasinpi vsatan2pi vsatanpi vscopysign vscosd vscospi vsexp10 vsexp2     \
+      vsfdim vsfmax vsfmin vsfmod vslog2 vslogb vsmaxmag vsminmag vsnextafter  \
+      vspowr vsremainder vssind vssinpi vstand vstanpi                         \
+      mode errstatus callback vslinearfrac vdlinearfrac

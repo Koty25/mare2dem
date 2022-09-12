@@ -1,0 +1,21 @@
+#===============================================================================
+# Copyright 2010-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+SOLVER_1 = dss_sym_c dss_unsym_c pardiso_sym_c pardiso_unsym_c pardiso_unsym_complex_c pardiso_sym_getdiag_c pardiso_sym_0_based pardiso_sym_reduced_solve_c pardiso_sym_diag_pivot_c pardiso_nonlinear nonuniform_heat pardiso_unsym_diag_pivot_c pardiso_handle_store_restore_c pardiso_schur_c pardiso_sym_bsr_c pardiso_lowrank_c pardiso_unsym_csc_c dss_unsym_complex_c
+SOLVER_2 = cg_jacobi_precon_c cg_no_precon_c cg_ssor_precon_c cg_st_criteria_c matrix_check
+SOLVER_3 = fgmres_full_funct_c fgmres_no_precon_c fgmres_st_criterion_c
+SOLVER_4 = ex_nlsqp_bc_c ex_nlsqp_c ex_nlsqp_bc_c_x ex_nlsqp_c_x ex_snlsqp_bc_c ex_snlsqp_c ex_snlsqp_bc_c_x ex_snlsqp_c_x
+SOLVER_5 = dcsrilu0_exampl1 dcsrilut_exampl1 djacobi_rci_c sjacobi_rci_c cg_mrhs_c cg_mrhs_precond_c cg_mrhs_stop_crt_c
+
+SOLVER = $(SOLVER_1) $(SOLVER_2) $(SOLVER_3) $(SOLVER_4) $(SOLVER_5)

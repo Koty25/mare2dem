@@ -1,0 +1,12 @@
+'ScaLAPACK, P?GETRF_DRIVER input file'
+2			NOUT, device out (must not be equal to 1)
+1.0E+0			threshold (set to 0.0E+0  to switch off residual checking)
+10			iterations
+2			NN, number of matrix dimensions (ordered pairs of M and N)
+78 19 			values of M
+78 30 			values of N
+3			NNB, number of block dimensions NB
+5 8 12			values of NB
+3			number of process grids (ordered pairs of P and Q)
+1 2 4			values of P
+4 2 1 			values of Q

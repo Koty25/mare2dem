@@ -1,0 +1,3 @@
+DATA file for programs DM_COMPLEX_2D_DOUBLE_EX2
+19         : m - size of transform  along first dimension
+12         : n - size of transform  along second dimension

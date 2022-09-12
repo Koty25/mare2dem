@@ -1,0 +1,22 @@
+#===============================================================================
+# Copyright 2012-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+SOLVERS_EE_SPARSE = dexample_sparse_c cexample_sparse_c sexample_sparse_c zexample_sparse_c 
+SOLVERS_EE_BANDED = dexample_banded_c cexample_banded_c sexample_banded_c zexample_banded_c
+SOLVERS_EE_DENSE = dexample_dense_c cexample_dense_c sexample_dense_c zexample_dense_c
+SOLVERS_EE_SPARSE_RCI = dexample_sparse_rci_c cexample_sparse_rci_c sexample_sparse_rci_c zexample_sparse_rci_c
+SOLVERS_EXTREMAL_SVD = sexample_extremal_svd_c dexample_extremal_svd_c
+SOLVERS_EXTREMAL_EE = dexample_extremal_ev_c dexample_extremal_gv_c sexample_extremal_ev_c sexample_extremal_gv_c
+
+SOLVERS_EE = $(SOLVERS_EE_SPARSE) $(SOLVERS_EE_DENSE) $(SOLVERS_EE_BANDED) $(SOLVERS_EE_SPARSE_RCI) $(SOLVERS_EXTREMAL_SVD) $(SOLVERS_EXTREMAL_EE)

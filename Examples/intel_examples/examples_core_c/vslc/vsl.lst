@@ -1,0 +1,79 @@
+#===============================================================================
+# Copyright 2003-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+VSL = $(VSLRNG) $(VSLCONVCORR) $(VSLSS)
+
+VSLRNG =                                                                        \
+      vsrngcauchy   vsrngexponential vsrnggaussian vsrnggumbel                  \
+      vsrnglaplace  vsrnglognormal   vsrngrayleigh vsrnguniform                 \
+      vsrngweibull vsrnggaussianmv_full vsrnggaussianmv_packed                  \
+      vsrngchisquare vdrngchisquare                                             \
+      vdrngcauchy   vdrngexponential vdrnggaussian vdrnggumbel                  \
+      vdrnglaplace  vdrnglognormal   vdrngrayleigh vdrnguniform                 \
+      vdrngweibull vdrnggaussianmv_full vdrnggaussianmv_packed                  \
+      virngbernoulli virngbinomial virngmultinomial virnggeometric              \
+      virnghypergeometric virngnegbinomial virngpoisson                         \
+      virnguniformbits virnguniformbits32 virnguniformbits64                    \
+      virnguniform virngpoissonv                                                \
+      vslcopystream vslcopystreamstate vslregisterbrng                          \
+      vslgetnumregbrngs vslgetstreamstatebrng vslleapfrogstream                 \
+      vslnewstreamex vslskipaheadstream vslskipaheadstreamex                    \
+      vdrngbeta vdrnggamma vsrngbeta vsrnggamma                                 \
+      vabsrngipoisson soboluserdirnums soboluserdirnums-joe-kuo                 \
+      vslstream2file vslstream2memory
+
+VSLCONVCORR =                                                                   \
+      example_ddcon example_ddcor example_scond example_sconf                   \
+      example_scord example_scorf example_sdcon example_sdcor                   \
+      example_sddcon example_sddcor                                             \
+      vsldconv_1d_auto vsldconv_2d_auto vsldconv_2d_direct vsldconv_2d_fft      \
+      vsldcorr_1d_auto vsldcorr_2d_auto vsldcorr_2d_direct vsldcorr_2d_fft      \
+      vslsconv_1d_auto vslsconv_2d_auto vslsconv_2d_direct vslsconv_2d_fft      \
+      vslscorr_1d_auto vslscorr_2d_auto vslscorr_2d_direct vslscorr_2d_fft      \
+      vslconvcopytask vslconvdeletetask vslconvsetdecimation                    \
+      vslconvsetinternalprecision vslconvsetmode vslconvsetstart                \
+      vslcorrcopytask vslcorrdeletetask vslcorrsetdecimation                    \
+      vslcorrsetinternalprecision vslcorrsetmode vslcorrsetstart                \
+      vsldconvexec vsldconvexec1d vsldconvexecx vsldconvexecx1d                 \
+      vsldconvnewtask vsldconvnewtask1d vsldconvnewtaskx                        \
+      vsldconvnewtaskx1d vsldcorrexec vsldcorrexec1d                            \
+      vsldcorrexecx vsldcorrexecx1d vsldcorrnewtask                             \
+      vsldcorrnewtask1d vsldcorrnewtaskx vsldcorrnewtaskx1d                     \
+      vslsconvexec vslsconvexec1d vslsconvexecx vslsconvexecx1d                 \
+      vslsconvnewtask vslsconvnewtask1d vslsconvnewtaskx                        \
+      vslsconvnewtaskx1d vslscorrexec vslscorrexec1d                            \
+      vslscorrexecx vslscorrexecx1d vslscorrnewtask                             \
+      vslscorrnewtask1d vslscorrnewtaskx vslscorrnewtaskx1d                     \
+      vslzconvexec vslzconvexec1d vslzconvexecx vslzconvexecx1d                 \
+      vslzconvnewtask vslzconvnewtask1d vslzconvnewtaskx                        \
+      vslzconvnewtaskx1d vslzcorrexec vslzcorrexec1d                            \
+      vslzcorrexecx vslzcorrexecx1d vslzcorrnewtask                             \
+      vslzcorrnewtask1d vslzcorrnewtaskx vslzcorrnewtaskx1d                     \
+      vslcconvexec vslcconvexec1d vslcconvexecx vslcconvexecx1d                 \
+      vslcconvnewtask vslcconvnewtask1d vslcconvnewtaskx                        \
+      vslcconvnewtaskx1d vslccorrexec vslccorrexec1d                            \
+      vslccorrexecx vslccorrexecx1d vslccorrnewtask                             \
+      vslccorrnewtask1d vslccorrnewtaskx vslccorrnewtaskx1d
+
+VSLSS =                                                                         \
+      vsldbasicstats vsldcorrelationmatrix vslddataprocessinginblocks           \
+      vsldgrouppooledcovariance vsldminmaxestimator vsldmissingvalues           \
+      vsldoutlierdetection vsldparametrizedmatrix vsldpartialcovariance         \
+      vsldquantile vsldrobustcov vsldstreamquantile vsldgrouppooledmean         \
+      vslsbasicstats vslscorrelationmatrix vslsdataprocessinginblocks           \
+      vslsgrouppooledcovariance vslsminmaxestimator vslsmissingvalues           \
+      vslsoutlierdetection vslsparametrizedmatrix vslspartialcovariance         \
+      vslsquantile vslsrobustcov vslsstreamquantile vslsgrouppooledmean         \
+      vslscp vsldcp vslsmdad vsldmdad vslsmnad vsldmnad vslsstatsum vsldstatsum \
+      vslssort vsldsort

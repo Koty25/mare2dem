@@ -1,0 +1,115 @@
+#===============================================================================
+# Copyright 2010-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+LAPACKE = \
+lapacke_cgeev_col \
+lapacke_cgeev_row \
+lapacke_cgels_col \
+lapacke_cgelsd_col \
+lapacke_cgelsd_row \
+lapacke_cgels_row \
+lapacke_cgesdd_col \
+lapacke_cgesdd_row \
+lapacke_cgesv_col \
+lapacke_cgesvd_col \
+lapacke_cgesvd_row \
+lapacke_cgesv_row \
+lapacke_cheev_col \
+lapacke_cheevd_col \
+lapacke_cheevd_row \
+lapacke_cheevr_col \
+lapacke_cheev_row \
+lapacke_cheevr_row \
+lapacke_cheevx_col \
+lapacke_cheevx_row \
+lapacke_chesv_col \
+lapacke_chesv_row \
+lapacke_cposv_col \
+lapacke_cposv_row \
+lapacke_csysv_col \
+lapacke_csysv_row \
+lapacke_dgeev_col \
+lapacke_dgeev_row \
+lapacke_dgels_col \
+lapacke_dgelsd_col \
+lapacke_dgelsd_row \
+lapacke_dgels_row \
+lapacke_dgesdd_col \
+lapacke_dgesdd_row \
+lapacke_dgesv_col \
+lapacke_dgesvd_col \
+lapacke_dgesvd_row \
+lapacke_dgesv_row \
+lapacke_dposv_col \
+lapacke_dposv_row \
+lapacke_dsyev_col \
+lapacke_dsyevd_col \
+lapacke_dsyevd_row \
+lapacke_dsyevr_col \
+lapacke_dsyev_row \
+lapacke_dsyevr_row \
+lapacke_dsyevx_col \
+lapacke_dsyevx_row \
+lapacke_dsysv_col \
+lapacke_dsysv_row \
+lapacke_sgeev_col \
+lapacke_sgeev_row \
+lapacke_sgels_col \
+lapacke_sgelsd_col \
+lapacke_sgelsd_row \
+lapacke_sgels_row \
+lapacke_sgesdd_col \
+lapacke_sgesdd_row \
+lapacke_sgesv_col \
+lapacke_sgesvd_col \
+lapacke_sgesvd_row \
+lapacke_sgesv_row \
+lapacke_sposv_col \
+lapacke_sposv_row \
+lapacke_ssyev_col \
+lapacke_ssyevd_col \
+lapacke_ssyevd_row \
+lapacke_ssyevr_col \
+lapacke_ssyev_row \
+lapacke_ssyevr_row \
+lapacke_ssyevx_col \
+lapacke_ssyevx_row \
+lapacke_ssysv_col \
+lapacke_ssysv_row \
+lapacke_zgeev_col \
+lapacke_zgeev_row \
+lapacke_zgels_col \
+lapacke_zgelsd_col \
+lapacke_zgelsd_row \
+lapacke_zgels_row \
+lapacke_zgesdd_col \
+lapacke_zgesdd_row \
+lapacke_zgesv_col \
+lapacke_zgesvd_col \
+lapacke_zgesvd_row \
+lapacke_zgesv_row \
+lapacke_zheev_col \
+lapacke_zheevd_col \
+lapacke_zheevd_row \
+lapacke_zheevr_col \
+lapacke_zheev_row \
+lapacke_zheevr_row \
+lapacke_zheevx_col \
+lapacke_zheevx_row \
+lapacke_zhesv_col \
+lapacke_zhesv_row \
+lapacke_zposv_col \
+lapacke_zposv_row \
+lapacke_zsysv_col \
+lapacke_zsysv_row

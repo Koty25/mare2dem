@@ -1,0 +1,37 @@
+#===============================================================================
+# Copyright 2006-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+DFT_MKL_DOUBLE = \
+real_1d_double_ex1 real_1d_double_ex2 real_1d_double_ex4 real_1d_double_ex5 real_1d_double_ex6 real_1d_double_ex8 \
+real_2d_double_ex2 real_2d_double_ex4 real_2d_double_ex6 real_2d_double_ex8 real_2d_double_ex10 \
+real_3d_double_ex2 real_3d_double_ex4 real_3d_double_ex6 real_3d_double_ex8 real_3d_double_ex10 \
+\
+complex_1d_double_ex1 complex_1d_double_ex2 complex_1d_double_ex3 complex_1d_double_ex4 \
+complex_1d_double_ex5 complex_1d_double_ex6 complex_1d_double_ex7 complex_1d_double_ex8 \
+complex_2d_double_ex1 complex_2d_double_ex2 complex_2d_double_ex3 complex_2d_double_ex4 \
+complex_2d_double_ex5 complex_2d_double_ex6 complex_2d_double_ex7 complex_2d_double_ex8 \
+complex_3d_double_ex1 complex_3d_double_ex2 complex_3d_double_ex3 complex_3d_double_ex4 \
+complex_3d_double_ex5 complex_3d_double_ex6 complex_3d_double_ex7 complex_3d_double_ex8 \
+
+DFT_MKL_SINGLE = \
+real_1d_single_ex1 real_1d_single_ex2 real_1d_single_ex4 real_1d_single_ex5 real_1d_single_ex6 real_1d_single_ex8 \
+real_2d_single_ex2 real_2d_single_ex4 real_2d_single_ex6 real_2d_single_ex8 real_2d_single_ex10 \
+real_3d_single_ex2 real_3d_single_ex4 real_3d_single_ex6 real_3d_single_ex8 real_3d_single_ex10 \
+\
+complex_1d_single_ex1 complex_1d_single_ex2 complex_1d_single_ex3 complex_1d_single_ex4 \
+complex_1d_single_ex5 complex_1d_single_ex6 complex_1d_single_ex7 complex_1d_single_ex8 \
+complex_2d_single_ex1 complex_2d_single_ex2 complex_2d_single_ex3 complex_2d_single_ex4 \
+complex_2d_single_ex5 complex_2d_single_ex6 complex_2d_single_ex7 complex_2d_single_ex8 \
+complex_3d_single_ex1 complex_3d_single_ex2 complex_3d_single_ex3 complex_3d_single_ex4 \
+complex_3d_single_ex5 complex_3d_single_ex6 complex_3d_single_ex7 complex_3d_single_ex8

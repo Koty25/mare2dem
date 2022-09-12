@@ -1,3 +1,5 @@
+!#include <scorep/SCOREP_User.inc>
+
     program runMARE2DEM
  
     use Occam  
@@ -15,11 +17,21 @@
     real(8)         :: timeOffset, time0 ! Timer temp
     integer         :: ierr, nproc, myID,iWorker !  Local MPI variables
     character(12)   :: ctemp   
+#ifdef TRACE
+        SCOREP_USER_REGION_DEFINE(iteration)
+#endif 
  
 !
 ! Initialize MPI:
 !
     call mpi_init( ierr )
+#ifdef ONEITERATION
+            write(*,*) ' MARE2DEM ONE ITERATION ONLY '
+#else
+            write(*,*) ' MARE2DEM MULTIPLE ITERATION  '
+#endif
+
+
     
 !
 ! Start the timer:
@@ -202,19 +214,27 @@
         ! Initialize the inversion settings:
         !
         lrunMARE2DEM       = .true.
+
+
+
         
         !
         ! Run the main loop
         !
         do while (lrunMARE2DEM)
-            
-            currentIteration = currentIteration + 1 
+          
+           currentIteration = currentIteration + 1
+
+#ifdef TRACE
+             SCOREP_USER_REGION_BEGIN( iteration, "iteration", SCOREP_USER_REGION_TYPE_COMMON )
+#endif
             
             !
             ! Compute an Occam iteration:
             !
+
              call computeOccamIteration(lSaveJacobian,lSaveSensitivity) 
-             
+                       
             !
             ! Write out the results:
             ! 
@@ -238,12 +258,23 @@
 
             endif
 
+#ifdef TRACE    
+            SCOREP_USER_REGION_END( iteration ) !end Instrumentation
+#endif
+
             !
             ! Check the convergence flag:
-            ! 
-            if (convergenceFlag > 1) then
+            !
+            
+#ifdef ONEITERATION
+            if (.true.) then
                 exit
             end if
+#else
+	    if (convergenceFlag > 1) then
+	        exit
+            end if
+#endif
 
         enddo
         

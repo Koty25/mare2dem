@@ -28,13 +28,14 @@
 !
 ! Module for various data transformations
 !
+!#include <scorep/SCOREP_User.inc>
+
     module dataTransformations
     
     use EM_constants
     implicit none
     
-    
-    contains 
+  contains 
 
 !
 ! MT Apparent resistivity
@@ -389,9 +390,12 @@
 
     subroutine worker_EM2D()
 
-   
     real(8) :: randNum
- 
+      
+#ifdef TRACE                                                                                                                                                                            
+    SCOREP_USER_REGION_DEFINE(ift)
+    SCOREP_USER_REGION_DEFINE(iftd)
+#endif
     
     call system_clock(count_rate=clockRate)  
     
@@ -422,14 +426,20 @@
     
 !
 ! Inverse Fourier transform from the (kx,y,z) domain to  the (x,y,z) domain
-!    
+!
+#ifdef TRACE
+    SCOREP_USER_REGION_BEGIN(ift, "inverseFourierTransform", SCOREP_USER_REGION_TYPE_COMMON )
+#endif 
     if (lPrintDebug) write(*,*) 'call inverseFourierTransform ', myID
     if (sType == 'cs') then
         call inverseFourierTransform
     elseif (sType == 'dc') then
         call inverseFourierTransform_DC
     endif
-    
+#ifdef TRACE
+    SCOREP_USER_REGION_END(ift)
+    SCOREP_USER_REGION_BEGIN(iftd, "inverseFourierTransform_Derivs", SCOREP_USER_REGION_TYPE_COMMON )
+#endif
     if (linversion) then
         if (lPrintDebug) write(*,*) 'call inverseFourierTransform_Derivs ', myID
         if (sType == 'cs') then
@@ -438,7 +448,9 @@
             call inverseFourierTransform_Derivs_DC
         endif             
     endif
-        
+#ifdef TRACE
+    SCOREP_USER_REGION_END(iftd)
+#endif
 !
 ! Move solutions into nTx/2 by nRx arrays for easy lookup:
 !
@@ -1056,11 +1068,22 @@
 !=================================================================================================================== computeAllKxFq
 !==================================================================================================================================!       
     subroutine computeAllKxFq
+    
+    !Instrumentation
+    !compute
+    
+
  
     integer     :: ikx,ifq,ikxG,iKxFq, isubset, ifqLast
     
     logical :: lLocalRefineIn
- 
+    
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(compute)
+	
+    SCOREP_USER_REGION_BEGIN( compute, "computeAllKxFq", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif    
+    
     if (lPrintDebug) write(*,*) 'entering computeAllKxFq...'
     
     lLocalRefineIn = lLocalRefine
@@ -1139,7 +1162,11 @@
     enddo
     
     lLocalRefine = lLocalRefineIn
- 
+
+#ifdef TRACE    
+    SCOREP_USER_REGION_END( compute ) !end Instrumentation
+#endif
+
     end subroutine computeAllKxFq
 !==================================================================================================================================! 
 !=================================================================================================================== setup_lDataMask
@@ -1287,13 +1314,36 @@
     
     integer :: isite,itrans,icomp,iPass, nc,nc0, ict
     
-    real(8), dimension(3,6)     :: V =[1,0,0, 0,1,0, 0,0,1, 1,0,0, 0,1,0, 0,0,1]
+    real(8), dimension(3,6)     :: V !=[1,0,0, 0,1,0, 0,0,1, 1,0,0, 0,1,0, 0,0,1]
     real(8)                     :: vec(3), theta, alpha, beta           ! site rotation angles
     real(8) , dimension(3,3)    :: RotR 
  
     integer, dimension(:), allocatable :: iG2LTx
   
     if (allocated(Components))  deallocate(Components)
+
+!
+! fill matrix V
+!
+
+V(1,1) = 1
+V(1,2) = 0
+V(1,3) = 0
+V(1,4) = 0
+V(1,5) = 1
+V(1,6) = 0
+V(2,1) = 0
+V(2,2) = 0
+V(2,3) = 1
+V(2,4) = 1
+V(2,5) = 0
+V(2,6) = 0
+V(3,1) = 0
+V(3,2) = 1
+V(3,3) = 0
+V(3,4) = 0
+V(3,5) = 0
+V(3,6) = 1
  
 !
 ! Array of transmitters for requested data:
@@ -1998,7 +2048,7 @@
 !==================================================================================================== inverseFourierTransform_Derivs
 !==================================================================================================================================! 
     subroutine inverseFourierTransform_Derivs
- 
+
     use SinCosFilters
     use mare2dem_input_data_params, only: phaseConvention
     
@@ -2013,6 +2063,10 @@
       
     character(256)  :: sFmt
     character(32)   :: stime
+    
+    !
+    ! Instrumentation FourierDeriv
+    !
     
     if (sType == 'mt') return
     
@@ -2106,7 +2160,6 @@
     sFmt = '(a5,2x,i6,2x,        a6,2x,i6,2x,  5x, 61x, 9x, a32,2x,i7,    2x,a19)'   
     if (lDisplayRefinementStats) write(*,sFmt) 'Proc:',myID,'Group:',iRefinementGrp, '# Derivative Transforms:',nift,trim(stime)
     
-                   
     end subroutine inverseFourierTransform_Derivs
     
 !==================================================================================================================================! 

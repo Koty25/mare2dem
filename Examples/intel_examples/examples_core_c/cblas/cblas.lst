@@ -1,0 +1,22 @@
+#===============================================================================
+# Copyright 2003-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+CBLAS = \
+cblas_sasum cblas_saxpyi cblas_saxpy cblas_scasum cblas_scnrm2 cblas_scopy cblas_sdoti cblas_sdot cblas_sgemm cblas_sgemm_batch cblas_sgemm_compute cblas_sgemmt cblas_sgemv cblas_sger cblas_sgthr cblas_sgthrz cblas_snrm2 cblas_srotg cblas_sroti cblas_srotmg cblas_srotm cblas_srot cblas_sscal cblas_ssctr cblas_sspmv cblas_sspr2 cblas_sspr cblas_sswap cblas_ssymm cblas_ssymv cblas_ssyr2k cblas_ssyr2 cblas_ssyrk cblas_ssyr cblas_stpmv cblas_stpsv cblas_strmm cblas_strmv cblas_strsm cblas_strsm_batch cblas_strsv cblas_saxpby cblas_isamax cblas_isamin cblas_sgbmv cblas_ssbmv cblas_stbmv cblas_stbsv \
+cblas_dasum cblas_daxpyi cblas_daxpy cblas_dcopy cblas_ddoti cblas_ddot cblas_dgemm cblas_dgemm_batch cblas_dgemm_compute cblas_dgemmt cblas_dgemv cblas_dger cblas_dgthr cblas_dgthrz cblas_dnrm2 cblas_drotg cblas_droti cblas_drotmg cblas_drotm cblas_drot cblas_dscal cblas_dsctr cblas_dspmv cblas_dspr2 cblas_dspr cblas_dswap cblas_dsymm cblas_dsymv cblas_dsyr2k cblas_dsyr2 cblas_dsyrk cblas_dsyr cblas_dtpmv cblas_dtpsv cblas_dtrmm cblas_dtrmv cblas_dtrsm cblas_dtrsm_batch cblas_dtrsv cblas_dzasum cblas_dznrm2 cblas_daxpby cblas_idamax cblas_idamin cblas_dgbmv cblas_dsbmv cblas_dtbmv cblas_dtbsv \
+cblas_caxpyi cblas_caxpy cblas_ccopy cblas_cdotci_sub cblas_cdotc_sub cblas_cdotui_sub cblas_cdotu_sub cblas_cgemm cblas_cgemm_batch cblas_cgemmt cblas_cgemv cblas_cgerc cblas_cgeru cblas_cgthr cblas_cgthrz cblas_chemm cblas_chemv cblas_cher2k cblas_cher2 cblas_cherk cblas_cher cblas_chpmv cblas_chpr2 cblas_chpr cblas_crotg cblas_cscal cblas_csctr cblas_csrot cblas_csscal cblas_cswap cblas_csymm cblas_csyr2k cblas_csyrk cblas_ctpmv cblas_ctpsv cblas_ctrmm cblas_ctrmv cblas_ctrsm cblas_ctrsm_batch cblas_ctrsv cblas_caxpby cblas_cgemm3m cblas_cgemm3m_batch cblas_icamax cblas_icamin cblas_cgbmv cblas_chbmv cblas_ctbmv cblas_ctbsv \
+cblas_zaxpyi cblas_zaxpy cblas_zcopy cblas_zdotci_sub cblas_zdotc_sub cblas_zdotui_sub cblas_zdotu_sub cblas_zdrot cblas_zdscal cblas_zgemm cblas_zgemm_batch cblas_zgemmt cblas_zgemv cblas_zgerc cblas_zgeru cblas_zgthr cblas_zgthrz cblas_zhemm cblas_zhemv cblas_zher2k cblas_zher2 cblas_zherk cblas_zher cblas_zhpmv cblas_zhpr2 cblas_zhpr cblas_zrotg cblas_zscal cblas_zsctr cblas_zswap cblas_zsymm cblas_zsyr2k cblas_zsyrk cblas_ztpmv cblas_ztpsv cblas_ztrmm cblas_ztrmv cblas_ztrsm cblas_ztrsm_batch cblas_ztrsv cblas_zgbmv cblas_zhbmv cblas_ztbmv cblas_ztbsv cblas_zgemm3m  cblas_zgemm3m_batch cblas_zaxpby cblas_izamax cblas_izamin\
+cblas_gemm_s16s16s32 cblas_gemm_s8u8s32 cblas_gemm_s8u8s32_compute cblas_gemm_s16s16s32_compute cblas_gemm_bf16bf16f32 cblas_gemm_bf16bf16f32_compute \
+mkl_dgemm_compact mkl_sgemm_compact mkl_zgemm_compact mkl_cgemm_compact mkl_dtrsm_compact mkl_strsm_compact mkl_ctrsm_compact mkl_ztrsm_compact \
+mkl_jit_create_dgemm mkl_jit_create_sgemm mkl_jit_create_zgemm mkl_jit_create_cgemm

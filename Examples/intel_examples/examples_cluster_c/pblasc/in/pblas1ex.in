@@ -1,0 +1,6 @@
+22		n, dimension of vectors, 0 < n <= 1000
+3		nb, size of blocks, must be > 0
+179.37		alpha, angle between vectors (measured in degrees), 0.0 <= alpha <= 180.0
+1.0		length of vector x, must be > 0.0
+8.0		length of vector y, must be > 0.0
+10.0		threshold for residual check (to switch off check set it < 0.0)

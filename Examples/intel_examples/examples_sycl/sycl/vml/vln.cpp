@@ -1,0 +1,317 @@
+/*******************************************************************************
+* Copyright 2018-2020 Intel Corporation.
+*
+* This software and the related documents are Intel copyrighted  materials,  and
+* your use of  them is  governed by the  express license  under which  they were
+* provided to you (License).  Unless the License provides otherwise, you may not
+* use, modify, copy, publish, distribute,  disclose or transmit this software or
+* the related documents without Intel's prior written permission.
+*
+* This software and the related documents  are provided as  is,  with no express
+* or implied  warranties,  other  than those  that are  expressly stated  in the
+* License.
+*******************************************************************************/
+
+/*
+ *
+ *  Content:
+ *            oneapi::mkl::vm::ln example program text (SYCL interface)
+ *
+ *******************************************************************************/
+
+#include <CL/sycl.hpp>
+#include <algorithm>
+#include <cstdint>
+#include <cstdlib>
+#include <cstring>
+#include <iostream>
+#include <iterator>
+#include <limits>
+#include <list>
+#include <map>
+#include <vector>
+
+#include "mkl.h"
+#include "oneapi/mkl/types.hpp"
+#include "oneapi/mkl/vm.hpp"
+
+#include "common_for_examples.hpp"
+
+#include "vml_common.hpp"
+
+static constexpr int VLEN = 4;
+
+static ulp_table_type ulp_table = {
+    {MAX_HA_ULP_S, 4.5}, {MAX_LA_ULP_S, 5.0}, {MAX_EP_ULP_S, 5.0E3},
+    {MAX_HA_ULP_D, 2.0}, {MAX_LA_ULP_D, 5.0}, {MAX_EP_ULP_D, 7.0E7},
+    {MAX_HA_ULP_C, 2.0}, {MAX_LA_ULP_C, 5.0}, {MAX_EP_ULP_C, 5.0E3},
+    {MAX_HA_ULP_Z, 4.0}, {MAX_LA_ULP_Z, 5.0}, {MAX_EP_ULP_Z, 7.0E7},
+};
+
+//!
+//! @brief Accuracy test
+//!
+template <typename A, typename R>
+bool vLnAccuracyLiteTest(const cl::sycl::device &dev) {
+  static constexpr int ACCURACY_LEN = VLEN;
+
+  // *************************************************************
+  // Data table declaraion
+  // *************************************************************
+data_2_t data
+{
+    .i = 0
+,
+
+    .data_f32 = std::vector<data_2_f32_t>
+
+    {
+
+{ { UINT32_C(0x41093E24) }, { UINT32_C(0x40098BE1) } }, //  0: vsLn ( 8.57767105      ) = ( 2.14916253      );
+{ { UINT32_C(0x4093852F) }, { UINT32_C(0x3FC39D07) } }, //  1: vsLn ( 4.61000776      ) = ( 1.52822959      );
+{ { UINT32_C(0x41011D03) }, { UINT32_C(0x4005A376) } }, //  2: vsLn ( 8.06958294      ) = ( 2.08810186      );
+{ { UINT32_C(0x41034C40) }, { UINT32_C(0x4006B659) } }, //  3: vsLn ( 8.20611572      ) = ( 2.10487962      );
+ }
+
+,
+    .data_f64 = std::vector<data_2_f64_t>
+
+    {
+
+{ { UINT64_C(0x402127C473A3E923) }, { UINT64_C(0x4001317C0DAF2E04) } }, //  0: vdLn ( 8.57767068267691535       ) = ( 2.14916239443641821       );
+{ { UINT64_C(0x401270A5F32DAE19) }, { UINT64_C(0x3FF873A0E2559781) } }, //  1: vdLn ( 4.6100080486899282        ) = ( 1.52822960292675725       );
+{ { UINT64_C(0x402023A0651C4741) }, { UINT64_C(0x4000B46EBA08EB66) } }, //  2: vdLn ( 8.06958309145159269       ) = ( 2.08810181941719275       );
+{ { UINT64_C(0x40206988134D9FDD) }, { UINT64_C(0x4000D6CB33EF951D) } }, //  3: vdLn ( 8.20611629793705255       ) = ( 2.10487976622483908       );
+ }
+
+,
+
+    .data_c32 = std::vector <data_2_c32_t>
+
+    {
+
+{ { UINT32_C(0x4093852F), UINT32_C(0x41093E24) }, { UINT32_C(0x4011AA91), UINT32_C(0x3F89F046) } }, //  0: vcLn ( 4.61000776      + i * 8.57767105      ) = ( 2.27603555      + i * 1.07764506      );
+{ { UINT32_C(0x41034C40), UINT32_C(0x41011D03) }, { UINT32_C(0x401C5C52), UINT32_C(0x3F46EA1A) } }, //  1: vcLn ( 8.20611572      + i * 8.06958294      ) = ( 2.44313478      + i * 0.777009606     );
+{ { UINT32_C(0x4036ECDE), UINT32_C(0x41136B29) }, { UINT32_C(0x4011106B), UINT32_C(0x3FA28F36) } }, //  2: vcLn ( 2.85820723      + i * 9.21366215      ) = ( 2.26662707      + i * 1.26999545      );
+{ { UINT32_C(0x40FDFDE5), UINT32_C(0x4082ABE3) }, { UINT32_C(0x400C182E), UINT32_C(0x3EF347D4) } }, //  3: vcLn ( 7.93724298      + i * 4.08348227      ) = ( 2.18897581      + i * 0.47515738      );
+ }
+
+,
+    .data_c64 = std::vector <data_2_c64_t>
+
+    {
+
+{ { UINT64_C(0x401270A5F32DAE19), UINT64_C(0x402127C473A3E923) }, { UINT64_C(0x40023552232A5F81), UINT64_C(0x3FF13E08AB53D691) } }, //  0: vzLn ( 4.6100080486899282        + i * 8.57767068267691535       ) = ( 2.27603557084142993       + i * 1.07764498638917794       );
+{ { UINT64_C(0x40206988134D9FDD), UINT64_C(0x402023A0651C4741) }, { UINT64_C(0x40038B8A3BF86018), UINT64_C(0x3FE8DD4333C089A0) } }, //  1: vzLn ( 8.20611629793705255       + i * 8.06958309145159269       ) = ( 2.44313475467425789       + i * 0.77700958354789762       );
+{ { UINT64_C(0x4006DD9BBAC0EE6B), UINT64_C(0x40226D6509CA7464) }, { UINT64_C(0x4002220D62974699), UINT64_C(0x3FF451E6AFEA09CE) } }, //  2: vzLn ( 2.8582071867111174        + i * 9.21366148563738108       ) = ( 2.26662709259182948       + i * 1.26999539104928116       );
+{ { UINT64_C(0x401FBFBCBB737F7A), UINT64_C(0x4010557C717977C6) }, { UINT64_C(0x40018305BFEE26E9), UINT64_C(0x3FDE68FA78360A78) } }, //  3: vzLn ( 7.93724339382594657       + i * 4.0834825258625127        ) = ( 2.1889758104851933        + i * 0.47515737285008397       );
+ }
+
+};
+
+
+  // *************************************************************
+  // Variable declaraions
+  // *************************************************************
+  // Input arguments
+  A arg1;
+  std::vector<A> varg1;
+  // Output results
+  R ref1;
+  std::vector<R> vref1;
+  std::vector<R> vres1;
+
+  // Number of errors
+  int errs = 0;
+  // Number of printed errors
+  int printed_errs = 0;
+
+  // *************************************************************
+  // Vector input data initialization
+  // *************************************************************
+  for (int i = 0; i < ACCURACY_LEN; ++i) {
+    // Getting values from reference data table
+
+    data.get_values(arg1, ref1);
+
+    // Pushing values into vectors
+    varg1.push_back(arg1);
+    vref1.push_back(ref1);
+
+  } // for (int i = 0; i < ACCURACY_LEN; ++i)
+
+  // Allocate memory for results
+  vres1.assign(varg1.size(), 0);
+
+  // Catch asynchronous exceptions
+  auto exception_handler = [](cl::sycl::exception_list exceptions) {
+    for (std::exception_ptr const &e : exceptions) {
+      try {
+        std::rethrow_exception(e);
+      } catch (cl::sycl::exception const &e) {
+        std::cout << "Caught asynchronous SYCL exception:\n"
+                  << e.what() << std::endl;
+      }
+    } // for (std::exception_ptr const& e : exceptions)
+  };
+
+  // Create execution queue with asynchronous error handling
+  cl::sycl::queue main_queue(dev, exception_handler);
+
+  // Get device name
+  std::string dev_name =
+      main_queue.get_device().get_info<cl::sycl::info::device::name>();
+
+  // *************************************************************
+  // Loop by all 3 accuracy modes of VM: HA, LA, EP:
+  // set computation mode, run VM and check results
+  // *************************************************************
+  for (int acc = 0; acc < ACCURACY_NUM; ++acc) {
+    // Clear result vectors
+    std::fill(vres1.begin(), vres1.end(), 0);
+
+    // Create sycl buffers
+    cl::sycl::buffer<A, 1> in1(varg1.begin(), varg1.end());
+
+    cl::sycl::buffer<R, 1> out1(vres1.begin(), vres1.end());
+
+    // Run VM function
+    oneapi::mkl::vm::ln(main_queue, varg1.size(), in1, out1, accuracy_mode[acc]);
+
+    // Get results from sycl buffers
+    auto host_vres1 = out1.template get_access<cl::sycl::access::mode::read>();
+
+    for (int i = 0; i < vres1.size(); ++i) {
+      vres1[i] = host_vres1[i];
+    }
+
+    // Catch sycl exceptions
+    try {
+      main_queue.wait_and_throw();
+    } catch (cl::sycl::exception &e) {
+      std::cerr << "SYCL exception during Accuracy Test\n"
+                << e.what() << std::endl
+                << "OpenCl status: " << e.get_cl_code() << std::endl;
+      return false;
+    }
+
+    // *************************************************************
+    // Compute ulp between computed and expected (reference)
+    // values and check
+    // *************************************************************
+    for (int i = 0; i < ACCURACY_LEN; ++i) {
+      // Compute ulp values for HA, LA and EP results
+      R ulp = compute_ulp<R>(vres1[i], vref1[i]);
+
+      std::cout << "\t\t" << accuracy_name[acc] << " vm::"
+                << "ln"
+                << "(" << varg1[i] << ") = " << vres1[i]
+
+                << std::endl;
+
+      // Check ulp
+      if (check_ulp(ulp, false, accuracy_mode[acc], ulp_table) == false) {
+        errs++;
+      }
+    } // for (int i = 0; i < varg1.size (); ++i)
+  }   // for (int acc = 0; acc < 3; ++acc)
+
+  std::cout << "\tResult: " << ((errs == 0) ? "PASS" : "FAIL") << std::endl;
+
+  return (errs == 0);
+} // template <typename A, typename R> bool vFuncAccuracyText (const device
+  // &dev)
+//
+// Description of example setup, apis used and supported floating point type
+// precisions
+//
+void print_example_banner() {
+  std::cout << "" << std::endl;
+  std::cout << "###############################################################"
+               "#########"
+            << std::endl;
+  std::cout << "# General VM "
+            << "ln"
+            << " Function Example: " << std::endl;
+  std::cout << "# " << std::endl;
+  std::cout << "# Using apis:" << std::endl;
+  std::cout << "#   vm::"
+            << "ln" << std::endl;
+  std::cout << "# " << std::endl;
+  std::cout << "# Supported floating point type precisions:" << std::endl;
+
+  std::cout << "#   float" << std::endl;
+
+  std::cout << "#   double" << std::endl;
+
+  std::cout << "#   std::complex<float>" << std::endl;
+
+  std::cout << "#   std::complex<double>" << std::endl;
+
+  std::cout << "###############################################################"
+               "#########"
+            << std::endl;
+  std::cout << std::endl;
+}
+
+//
+// Main entry point for example.
+//
+// Dispatches to appropriate device types as set at build time with flag:
+// -DSYCL_DEVICES_host -- only runs SYCL HOST device
+// -DSYCL_DEVICES_cpu -- only runs SYCL CPU device
+// -DSYCL_DEVICES_gpu -- only runs SYCL GPU device
+// -DSYCL_DEVICES_all (default) -- runs on all: HOST, CPU and GPU devices
+//
+//  For each device selected and each data type supported, the example
+//  runs with all supported data types
+//
+int main(int argc, char **argv) {
+  // Number of errors occured
+  int errs = 0;
+
+  // Print standard banner for VM examples
+  print_example_banner();
+
+  // List of available devices
+  std::list<my_sycl_device_types> list_of_devices;
+  set_list_of_devices(list_of_devices);
+
+  // Loop by all available devices
+  for (auto dev_type : list_of_devices) {
+    cl::sycl::device my_dev;
+    bool my_dev_is_found = false;
+    get_sycl_device(my_dev, my_dev_is_found, dev_type);
+
+    // Run tests if the device is available
+    if (my_dev_is_found) {
+      std::cout << "Running tests on " << sycl_device_names[dev_type] << ".\n";
+
+      std::cout << "\tRunning with single precision real data type:"
+                << std::endl;
+      errs += vLnAccuracyLiteTest<float, float>(my_dev);
+
+      std::cout << "\tRunning with double precision real data type:"
+                << std::endl;
+      errs += vLnAccuracyLiteTest<double, double>(my_dev);
+
+      std::cout << "\tRunning with single precision complex data type:"
+                << std::endl;
+      errs +=
+          vLnAccuracyLiteTest<std::complex<float>, std::complex<float>>(my_dev);
+
+      std::cout << "\tRunning with double precision complex data type:"
+                << std::endl;
+      errs += vLnAccuracyLiteTest<std::complex<double>, std::complex<double>>(
+          my_dev);
+
+    } else {
+
+      std::cout << "No " << sycl_device_names[dev_type]
+                << " devices found; skipping " << sycl_device_names[dev_type]
+                << " tests.\n";
+    }
+  }
+
+  return 0;
+}

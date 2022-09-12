@@ -1,0 +1,27 @@
+#===============================================================================
+# Copyright 2015-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+SPBLAS = $(IE_SPBLAS_S) $(IE_SPBLAS_D) $(IE_SPBLAS_C) $(IE_SPBLAS_Z) $(SPBLAS_S) $(SPBLAS_D) $(SPBLAS_C) $(SPBLAS_Z) $(SPARSE_QR_D)
+
+SPBLAS_S = sbsr scoo scsc scsr sdia ssky scsr_addition scsr_multiplication sconverters
+SPBLAS_D = dbsr dcoo dcsc dcsr ddia dsky dcsr_addition dcsr_multiplication dconverters
+SPBLAS_C = cbsr ccoo ccsc ccsr cdia csky ccsr_addition ccsr_multiplication cconverters
+SPBLAS_Z = zbsr zcoo zcsc zcsr zdia zsky zcsr_addition zcsr_multiplication zconverters
+
+IE_SPBLAS_S = sparse_s_csrmv
+IE_SPBLAS_D = sparse_d_csrmv sparse_d_export_csr
+IE_SPBLAS_C = sparse_c_csrmv
+IE_SPBLAS_Z = sparse_z_csrmv sparse_z_export_csr
+
+SPARSE_QR_D = sparse_d_qr

@@ -33,7 +33,9 @@
 !
 !==================================================================================================================================! 
 !======================================================================================================================== em2dkx_mod
-!==================================================================================================================================!     
+!==================================================================================================================================!  
+!#include <scorep/SCOREP_User.inc>
+   
     module em2dkx_mod 
 
     use EM_constants
@@ -359,6 +361,14 @@
     integer         :: e, irefine,iTx 
     character(256)  :: filename, cadapt
     
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(error_estimate)
+	
+    SCOREP_USER_REGION_BEGIN( error_estimate, "error_estimate", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif
+    
+
+    
     if (lprintDebug_em2dkx) write(*,*) myID,': errorindicator...'
   
     !
@@ -572,6 +582,11 @@
     if (allocated(col_q))    deallocate (col_q)
     if (allocated(irw_q))    deallocate (irw_q)
     
+#ifdef TRACE
+    SCOREP_USER_REGION_END(error_estimate)
+#endif
+    
+    
     end subroutine estimateerror    
     
 !==================================================================================================================================! 
@@ -593,15 +608,36 @@
     complex(8)                  :: sigx,sigy,sigz,dsds0,dsdeta,dsdtau,dsdc 
     complex(8)                  :: gammay2, gammaz2, expikdx     
 
-    real(8), dimension(3,3)     :: M = [ 2d0, 1d0, 1d0,   1d0, 2d0, 1d0,   1d0, 1d0, 2d0] ! mass matrix, column major order
+    real(8), dimension(3,3)     :: M != (/ 2d0, 1d0, 1d0,   1d0, 2d0, 1d0,   1d0, 1d0, 2d0 /) ! mass matrix, column major order
     
     integer                 :: iComp, isign, isignAdj(2), iq, nq, nrhs,irhs
     real(8)                 :: cosazi,sinazi,cosdip,sindip,sig0
     real(8)                 :: jax,jay,jaz,max,may,maz
  
     complex(8), dimension(:), allocatable :: ex1dmt,hx1dmt
+    
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(derivs_comp_adj)
+	
+    SCOREP_USER_REGION_BEGIN( derivs_comp_adj, "derivs_comp_adj", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif
+    
 
     if (lprintDebug_em2dkx) write(*,*) myID,': comp_adj_derivs...'     
+!
+! fill matrix M
+!
+
+M(1,1) = 2d0
+M(1,2) = 1d0
+M(1,3) = 1d0
+M(2,1) = 1d0
+M(2,2) = 2d0
+M(2,3) = 1d0
+M(3,1) = 1d0
+M(3,2) = 1d0
+M(3,3) = 2d0
+
 !
 ! initialize to zero:
 !    
@@ -914,6 +950,11 @@
     deallocate(rhs_wh)
                 
     if (allocated(ex1dmt)) deallocate(ex1dmt,hx1dmt)
+    
+#ifdef TRACE
+    SCOREP_USER_REGION_END(derivs_comp_adj)
+#endif     
+
 
     end subroutine comp_adj_derivs
   
@@ -1395,6 +1436,14 @@
     character(256)      :: cadapt, filename          
     real(8), dimension(:,:), allocatable :: yz
     real(8) :: tstart,tend
+    
+ 
+#ifdef TRACE
+	SCOREP_USER_REGION_DEFINE(em2dkx_localRefinement)
+	SCOREP_USER_REGION_BEGIN( em2dkx_localRefinement, "em2dkx_localRefinement", SCOREP_USER_REGION_TYPE_COMMON)
+#endif
+            
+
             
     if (lprintDebug_em2dkx) write(*,*) myID,': entered localRefinement_em2dkx...'            
     
@@ -1634,6 +1683,12 @@
  
     if (lDisplayRefinementStats) call displayRefinementStats_em2dkx(iRefinementGrp,isubset,meshnumber,.false., &
                                              & oldnodes,newnodes,-2d0,-2d0, tend-tstart)
+                                             
+
+                                       
+#ifdef TRACE
+    SCOREP_USER_REGION_END(em2dkx_localRefinement)
+#endif 
                                         
     end subroutine localRefinement_em2dkx
   
@@ -3855,7 +3910,13 @@
 ! Kerry Key
 ! Scripps Institution of Oceanography
 !
- 
+
+#ifdef TRACE
+	SCOREP_USER_REGION_DEFINE(lhs_gen)
+	SCOREP_USER_REGION_BEGIN( lhs_gen, "lhs_gen", SCOREP_USER_REGION_TYPE_COMMON)
+#endif
+
+
     if (sType == 'mt') then ! MT using decoupled linear systems:
     
         kx = 0d0 ! Make sure kx=0    
@@ -3864,7 +3925,9 @@
         call gen_lhs_csem
     endif
     
-   
+#ifdef TRACE
+    SCOREP_USER_REGION_END(lhs_gen)
+#endif  
 
     end subroutine gen_lhs        
 
@@ -4942,6 +5005,12 @@
 
     integer :: iTx
     
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(primal_solve)
+	
+    SCOREP_USER_REGION_BEGIN( primal_solve, "primal_solve", SCOREP_USER_REGION_TYPE_COMMON ) 
+#endif 
+    
     if (lSaveLinearSystem) call write_Ab
              
     if (sType == 'cs') then ! CSEM dipole
@@ -4982,7 +5051,9 @@
                       
     end if
 
-    
+#ifdef TRACE    
+    SCOREP_USER_REGION_END( primal_solve ) !end Instrumentation
+#endif
                  
     end subroutine solve_primal   
                     

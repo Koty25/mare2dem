@@ -1,0 +1,25 @@
+#===============================================================================
+# Copyright 2010-2020 Intel Corporation.
+#
+# This software and the related documents are Intel copyrighted  materials,  and
+# your use of  them is  governed by the  express license  under which  they were
+# provided to you (License).  Unless the License provides otherwise, you may not
+# use, modify, copy, publish, distribute,  disclose or transmit this software or
+# the related documents without Intel's prior written permission.
+#
+# This software and the related documents  are provided as  is,  with no express
+# or implied  warranties,  other  than those  that are  expressly stated  in the
+# License.
+#===============================================================================
+
+SOLVER_1 = dss_sym_f pardiso_sym_f pardiso_unsym_f pardiso_unsym_complex_f  pardiso_sym_reduced_solve_f pardiso_unsym_cmplx_store_restore_f
+SOLVER_2 = dcsrilut_exampl2 dcsrilu0_exampl2 cg_jacobi_precon cg_no_precon cg_ssor_precon cg_st_criteria cg_mrhs
+SOLVER_3 = fgmres_st_criterion_f fgmres_no_precon_f fgmres_full_funct_f
+SOLVER_4 = ex_nlsqp_bc_f ex_nlsqp_f ex_snlsqp_bc_f ex_snlsqp_f
+SOLVER_5 = djacobi_rci_f sjacobi_rci_f matrix_check_f
+SOLVER_9 = dss_sym_f90 pardiso_sym_f90 ex_nlsqp_f90 ex_nlsqp_bc_f90_x ex_nlsqp_f90_x matrix_check cg_mrhs_precond cg_mrhs_stop_crt
+
+SOLVER_F = $(SOLVER_1) $(SOLVER_4) $(SOLVER_5)
+SOLVER_F90 = $(SOLVER_9) $(SOLVER_2) $(SOLVER_3)
+
+SOLVER = $(SOLVER_F) $(SOLVER_F90)

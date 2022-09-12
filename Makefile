@@ -211,6 +211,9 @@ triangle.o:  triangle.c  triangle.h
 %.o: %.f90 
 	$(FC) $(FFLAGS) -c -o $@ $^
 
+%.o: %.F90 
+	$(FC) $(FFLAGS) -c -o $@ $^
+
 # General C compile:
 %.o : %.c
 	$(CC) $(CFLAGS) $(CDEFS) $(SUPERLU_HEADER) -c -o $@ $< 

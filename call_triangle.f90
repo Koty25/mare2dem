@@ -28,10 +28,10 @@
 !  Uses external routines: c_fortran_triangluate_input, c_fortran_triangluate_output
 !
 ! DGM 2/23/2012 - Windows compilation support
-#IF DEFINED(_WIN32) .OR. DEFINED(_WIN64)
-#DEFINE c_fortran_triangluate_input  c_fortran_triangluate_input_
-#DEFINE c_fortran_triangluate_output c_fortran_triangluate_output_
-#ENDIF
+!#IF DEFINED(_WIN32) .OR. DEFINED(_WIN64)
+!#DEFINE c_fortran_triangluate_input  c_fortran_triangluate_input_
+!#DEFINE c_fortran_triangluate_output c_fortran_triangluate_output_
+!#ENDIF
 
     module triangle_mesh
     

@@ -1,0 +1,5 @@
+51		n, dimension of vectors, 0 < n <= 1000
+4		nb, size of blocks, must be > 0
+2		p, number of rows in the process grid, must be > 0
+2		q, number of columns in the process grid, must be > 0, p*q = number of processes
+2.0		threshold for residual check (to switch off check set it < 0.0)
