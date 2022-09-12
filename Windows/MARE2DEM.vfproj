@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VisualStudioProject ProjectCreator="Intel Fortran" Keyword="Console Application" Version="11.0" ProjectIdGuid="{663ED40A-8767-4B50-9C3E-C5A4B9B82B12}">
+	<Platforms>
+		<Platform Name="x64"/></Platforms>
+	<Configurations>
+		<Configuration Name="Debug|x64">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" DebugInformationFormat="debugEnabled" Optimization="optimizeDisabled" HeapArrays="100" Preprocess="preprocessYes" AdditionalIncludeDirectories="\OpenMPI\include" OpenMPConditionalCompilation="false" Interfaces="true" WarnInterfaces="true" ExternalNameInterpretation="extNameLowerCase" Traceback="true" RuntimeLibrary="rtMultiThreadedDebugDLL" UseMkl="mklSequential"/>
+				<Tool Name="VFLinkerTool" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="\OpenMPI\lib" GenerateDebugInformation="true" SubSystem="subSystemConsole" AdditionalDependencies="\OpenMPI\lib\libmpi_f77.lib \OpenMPI\lib\libmpi.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration>
+		<Configuration Name="Release|x64" OutputDirectory="$(ProjectDir)\..">
+				<Tool Name="VFFortranCompilerTool" SuppressStartupBanner="true" HeapArrays="100" Preprocess="preprocessYes" AdditionalIncludeDirectories="\OpenMPI\include" OpenMPConditionalCompilation="false" ExternalNameInterpretation="extNameLowerCase" RuntimeLibrary="rtMultiThreadedDLL" UseMkl="mklSequential"/>
+				<Tool Name="VFLinkerTool" OutputFile="$(ProjectDir)\$(ProjectName).exe" LinkIncremental="linkIncrementalNo" SuppressStartupBanner="true" AdditionalLibraryDirectories="\OpenMPI\lib" SubSystem="subSystemConsole" AdditionalDependencies="libmpi_f77.lib libmpi.lib"/>
+				<Tool Name="VFResourceCompilerTool"/>
+				<Tool Name="VFMidlTool" SuppressStartupBanner="true" TargetEnvironment="midlTargetAMD64"/>
+				<Tool Name="VFCustomBuildTool"/>
+				<Tool Name="VFPreLinkEventTool"/>
+				<Tool Name="VFPreBuildEventTool"/>
+				<Tool Name="VFPostBuildEventTool"/>
+				<Tool Name="VFManifestTool" SuppressStartupBanner="true"/></Configuration></Configurations>
+	<Files>
+		<Filter Name="Header Files">
+		<File RelativePath=".\EM_parameters.inc"/></Filter>
+		<Filter Name="Source Files" Filter="f90;for;f;fpp;ftn;def;odl;idl">
+		<File RelativePath=".\binaryTree.f90"/>
+		<File RelativePath=".\call_triangle.f90"/>
+		<File RelativePath=".\dc2dkx.f90"/>
+		<File RelativePath=".\EM2D.f90"/>
+		<File RelativePath=".\em2dkx.f90"/>
+		<File RelativePath=".\EMconstants.f90"/>
+		<File RelativePath=".\fem2D_utilities.f90"/>
+		<File RelativePath=".\FilterModules.f90"/>
+		<File RelativePath=".\intelMKL_solver.f90"/>
+		<File RelativePath=".\kdtree2.f90"/>
+		<File RelativePath=".\kx_io.f90"/>
+		<File RelativePath=".\mare2dem_common.f90"/>
+		<File RelativePath=".\mare2dem_io.f90"/>
+		<File RelativePath=".\mare2dem_mpi.f90"/>
+		<File RelativePath=".\mare2dem_worker.f90"/>
+		<File RelativePath=".\mt1D.f90"/>
+		<File RelativePath=".\Occam.f90"/>
+		<File RelativePath=".\quad.f90"/>
+		<File RelativePath=".\RunMARE2DEM.f90"/>
+		<File RelativePath=".\sort.f90"/>
+		<File RelativePath=".\spline_kx_module.f90"/>
+		<File RelativePath=".\string_helpers.f90"/>
+		<File RelativePath=".\superlu_zsolver.f90"/></Filter></Files>
+	<Globals/></VisualStudioProject>

@@ -1,0 +1,59 @@
+!=======================================================================
+! MARE2DEM: Modeling with Adaptively Refined Elements for 2.5D EM
+!
+! A parallel goal-oriented adaptive finite element forward and inverse
+! modeling code for electromagnetic fields from electric dipoles, magnetic
+! dipoles and magnetotelluric sources in triaxially anisotropic conducting
+! media. Iterative adaptive mesh refinement is accomplished using the
+! goal-oriented error estimation method described in Key and Ovall (2011) 
+! Inversion is accomplished with Occam's method (Constable et al., 1987).
+! Key (2016) describes most of the features in the current 2018 version 
+! of the code.
+! 
+! 
+! When citing the code, please use the most recent reference:
+!
+!   Key, K. MARE2DEM: a 2-D inversion code for controlled-source electromagnetic 
+!   and magnetotelluric data. Geophysical Journal International 207, 571–588 (2016).    
+!
+!                 This work was supported by the 
+!
+!            Electromagnetic Methods Research Consortium
+!               Lamont-Doherty Earth Observatory
+!                    Columbia University
+!               http://emrc.ldeo.columbia.edu
+! 
+!                  Originally funded by the:
+!
+!            Seafloor Electromagnetic Methods Consortium 
+!              Scripps Institution of Oceanography 
+!             University of California San Diego
+!
+!
+!    Copyright (C) 2017-2019
+!    Kerry Key
+!    Lamont-Doherty Earth Observatory
+!    Columbia University
+!    http://emlab.ldeo.columbia.edu
+!
+!    Copyright (C) 2008-2016
+!    Kerry Key
+!    Scripps Institution of Oceanography
+!    University of California, San Diego
+!
+!
+! LICENSE:
+!
+!    MARE2DEM is free software: you can redistribute it and/or modify
+!    it under the terms of the GNU General Public License as published by
+!    the Free Software Foundation, either version 3 of the License, or
+!    (at your option) any later version.
+!
+!    MARE2DEM is distributed in the hope that it will be useful,
+!    but WITHOUT ANY WARRANTY; without even the implied warranty of
+!    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+!    GNU General Public License for more details.
+!
+!    You should have received a copy of the GNU General Public License
+!    along with MARE2DEM.  If not, see <http://www.gnu.org/licenses/>.
+!
