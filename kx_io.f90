@@ -105,8 +105,8 @@ module kx_io
 ! Mesh parameters are stored in the derived type 'trimesh' for ease of use
 !
     type (trimesh), public :: mesh    
-    character(256), public :: fileroot         ! base name for mesh files 
-    integer, public        :: meshnumber       ! keeps track of mesh refinement number (1 = starting mesh)
+    character(256), public :: fileroot , cfileroot        ! base name for mesh files
+    integer, public        :: meshnumber                  ! keeps track of mesh refinement number (1 = starting mesh)
     
 !
 ! Local a priori refinement parameters:
@@ -148,6 +148,8 @@ module kx_io
     logical, public         :: lSaveMeshFiles     = .false. ! set to .true. to write out the mesh to .poly, .ele and .node files   
     integer, public         :: idual_func         = 2       ! 0,1,2 for G0,G1,G2 error functionals from our paper
     logical, public         :: lSolveBumpGaussSeidel= .true.   
+    logical, public         :: lprintTrace_em2dkx = .false. ! set to .true. to print tracing information of em2dkx
+    real(8), public         :: t0_em2dkxTrace     = 0.       ! Initial time to be used during em2dkx tracing
 
 !-----------
 ! Outputs:

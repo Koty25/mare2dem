@@ -1,11 +1,14 @@
 #
 # Make include file for compiling MARE2DEM on MacOS systems with OpenMPI built around the Intel compiler suite
 #
-
+#Scorep tracing manual instrumentation commands
+    PREP = scorep
+    SFLAGS = --user --nocompiler
+    TRACE_FLAG = -DTRACE
                                   
 # MPI-Fortran compiler and compiler flags:  
     FC_NO_INSTR = $(INTEL_PATH)/oneapi/mpi/2021.1.1//bin/mpif90
-    FC = $(PREP) $(FC_NO_INSTR)
+    FC = $(PREP) $(SFLAGS) $(FC_NO_INSTR) $(TRACE_FLAG)
     FFLAGS  = -cxxlib -O2 -fpp -fPIC -fc=$(INTEL_PATH)/oneapi/compiler/2021.1.1/linux/bin/intel64/ifort    
    
 # MPI C compiler and compiler flags:    

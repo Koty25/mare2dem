@@ -10,7 +10,9 @@ help_script()
 {
       cat << EOF
 Usage: $0 [options] outputfile.org
+
 Script for to get machine information before doing the experiment
+
 OPTIONS:
    -h      Show this message
    -t      Title of the output file

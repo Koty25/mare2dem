@@ -28,14 +28,13 @@
 !
 ! Module for various data transformations
 !
-#include <scorep/SCOREP_User.inc>
-
     module dataTransformations
     
     use EM_constants
     implicit none
     
-  contains 
+    
+    contains 
 
 !
 ! MT Apparent resistivity
@@ -390,12 +389,9 @@
 
     subroutine worker_EM2D()
 
+   
     real(8) :: randNum
-      
-#ifdef TRACE                                                                                                                                                                            
-    SCOREP_USER_REGION_DEFINE(ift)
-    SCOREP_USER_REGION_DEFINE(iftd)
-#endif
+ 
     
     call system_clock(count_rate=clockRate)  
     
@@ -426,20 +422,14 @@
     
 !
 ! Inverse Fourier transform from the (kx,y,z) domain to  the (x,y,z) domain
-!
-#ifdef TRACE
-    SCOREP_USER_REGION_BEGIN(ift, "inverseFourierTransform", SCOREP_USER_REGION_TYPE_COMMON )
-#endif 
+!    
     if (lPrintDebug) write(*,*) 'call inverseFourierTransform ', myID
     if (sType == 'cs') then
         call inverseFourierTransform
     elseif (sType == 'dc') then
         call inverseFourierTransform_DC
     endif
-#ifdef TRACE
-    SCOREP_USER_REGION_END(ift)
-    SCOREP_USER_REGION_BEGIN(iftd, "inverseFourierTransform_Derivs", SCOREP_USER_REGION_TYPE_COMMON )
-#endif
+    
     if (linversion) then
         if (lPrintDebug) write(*,*) 'call inverseFourierTransform_Derivs ', myID
         if (sType == 'cs') then
@@ -448,9 +438,7 @@
             call inverseFourierTransform_Derivs_DC
         endif             
     endif
-#ifdef TRACE
-    SCOREP_USER_REGION_END(iftd)
-#endif
+        
 !
 ! Move solutions into nTx/2 by nRx arrays for easy lookup:
 !
@@ -491,6 +479,7 @@
 !
 ! Create the starting mesh:
 !
+    if ( allocated( inputmesh%attr ) ) call deallocate_trimesh(inputmesh,.false.) 
     call copy_trimesh(inputmodel,inputmesh)
 
     if (inputmesh%nele == 0 ) then 
@@ -1068,22 +1057,11 @@
 !=================================================================================================================== computeAllKxFq
 !==================================================================================================================================!       
     subroutine computeAllKxFq
-    
-    !Instrumentation
-    !compute
-    
-
  
     integer     :: ikx,ifq,ikxG,iKxFq, isubset, ifqLast
     
     logical :: lLocalRefineIn
-    
-#ifdef TRACE
-    SCOREP_USER_REGION_DEFINE(compute)
-	
-    SCOREP_USER_REGION_BEGIN( compute, "computeAllKxFq", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif    
-    
+ 
     if (lPrintDebug) write(*,*) 'entering computeAllKxFq...'
     
     lLocalRefineIn = lLocalRefine
@@ -1162,11 +1140,7 @@
     enddo
     
     lLocalRefine = lLocalRefineIn
-
-#ifdef TRACE    
-    SCOREP_USER_REGION_END( compute ) !end Instrumentation
-#endif
-
+ 
     end subroutine computeAllKxFq
 !==================================================================================================================================! 
 !=================================================================================================================== setup_lDataMask
@@ -1663,9 +1637,18 @@
 !==================================================================================================================================!       
     subroutine refinementKernel(isubset,ikx,ifq)
 
+    use kx_io
+    use occam
+    use mare2dem_global
+
     integer, intent(in) :: isubset, ikx,ifq
     character(256)      ::  cGroup, cSubset     
     real(8)             ::  tstart, tend
+    integer             ::  iMeshnb
+    logical             ::  res
+    character(256)      ::  cfilename
+    character(256)      ::  cMeshNumber, cImeshNb
+    type(trimesh)       ::  reusedMesh
  
 !
 ! Compute the 2.5 response for this kx, and possibly do some mesh refinement:
@@ -1674,6 +1657,61 @@
     write(cSubset,'(i6)') isubset      
     fileroot = trim(outputFileroot)//'.'//trim(adjustl(cGroup))//'.'//trim(adjustl(cSubset))   
     
+!!!! REUSE REFINE IF BLOCK
+! if lReuseRefine check for the highest outputFileroot.cGroup.cSubset.meshnumber.poly and read the .poly file on mesh.
+    ! The maximum number of meshes is controled by the integer maxnadapt_default
+    !write(*,*) 'cfilename: ',trim(cfilename)
+    !write(*,*) 'Debug: ', lReuseRefine, numForwardCalls, meshnumber
+    if ((lReuseRefine .and. (numForwardCalls > 0) .and. (meshnumber == 1)) .or. (lReuseRefine .and. (mod(currentIteration,nbOccItToReuseRefine) > 0) .and. (meshnumber == 1))) then
+       !meshnumber > 1 at this point is a shared mesh (from vanilla m2d), only for foward calls that are not the fist (numforwardcalls =0) of the occam iteration (inter occam iteration reuse)
+       !OR is a occam iteration that is reusing the refinement of a previous occam iteration (intra occam iteration reuse)
+        do iMeshnb = 2,maxnadapt_default
+            write(cImeshNb,'(i6)') iMeshnb
+            cfileroot=trim(fileroot)//'.'//trim(adjustl(cImeshNb))
+            cfilename=trim(cfileroot)//'.poly'
+            !write(*,*) 'cfilename: ',trim(cfilename)
+            inquire(file=trim(cfilename), exist=res)
+            if (res == .false.) then
+                exit
+            else
+                meshnumber = iMeshnb
+            endif
+         enddo
+         if (meshnumber > 1) then
+            
+            !if ( allocated( mesh%attr ) ) call deallocate_trimesh(mesh,.false.)
+            
+            write(cMeshNumber,'(i6)') meshnumber
+            cfileroot=trim(fileroot)//'.'//trim(adjustl(cMeshNumber))
+            !cfileroot='Demo'
+            call read_triangle(cfileroot,reusedMesh)
+
+            if ( allocated( mesh%attr ) ) call deallocate_trimesh(mesh,.false.)
+            !
+            ! Assign reused mesh to inputmodel (mare2dem_common.f90)
+            ! The raw input mesh is called inputmodel
+            ! The processed (triangulated) mesh is called inputmesh
+            ! TODO: make in such a way that the reused mesh doesn't override inputmodel
+            !
+            if ( allocated( inputmodel%attr ) ) call deallocate_trimesh(inputmodel,.false.)  
+            if (lPrintDebug) write(*,*) 'call copy_trimesh (reusedMesh): ',myid
+            call copy_trimesh(reusedMesh,inputmodel)
+            !
+            ! Coarsen input model if this is CSEM data:  
+            !
+            !if ( (sType /= 'mt') .and. (lUseInversionMeshCoarsening) ) call coarsenModel
+            !
+            ! Generate the starting mesh:
+            !    
+            if (lprintDebug) write(*,*) '...call getStartingMesh   ',myid
+            call getStartingMesh
+            if ( allocated( mesh%attr ) ) call deallocate_trimesh(mesh,.false.)
+            if (lPrintDebug) write(*,*) 'call copy_trimesh: ',myid               
+            call copy_trimesh(inputmesh,mesh)
+            call deallocate_trimesh(reusedMesh,.false.)
+        endif
+    endif
+
 !
 ! If first mesh, copy from input:
 !
@@ -1695,7 +1733,7 @@
     if (sType == 'dc') then
         call dc2dkx(iRefinementGrp,isubset,lrefine)  
     else
-        call em2dkx(iRefinementGrp,isubset,lrefine)
+        call em2dkx(iRefinementGrp,isubset,lrefine,numForwardCalls,currentIteration)
     endif
     
 !
@@ -2025,7 +2063,7 @@
 !==================================================================================================== inverseFourierTransform_Derivs
 !==================================================================================================================================! 
     subroutine inverseFourierTransform_Derivs
-
+ 
     use SinCosFilters
     use mare2dem_input_data_params, only: phaseConvention
     
@@ -2040,10 +2078,6 @@
       
     character(256)  :: sFmt
     character(32)   :: stime
-    
-    !
-    ! Instrumentation FourierDeriv
-    !
     
     if (sType == 'mt') return
     
@@ -2137,6 +2171,7 @@
     sFmt = '(a5,2x,i6,2x,        a6,2x,i6,2x,  5x, 61x, 9x, a32,2x,i7,    2x,a19)'   
     if (lDisplayRefinementStats) write(*,sFmt) 'Proc:',myID,'Group:',iRefinementGrp, '# Derivative Transforms:',nift,trim(stime)
     
+                   
     end subroutine inverseFourierTransform_Derivs
     
 !==================================================================================================================================! 

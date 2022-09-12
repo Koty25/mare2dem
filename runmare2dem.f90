@@ -1,5 +1,3 @@
-#include <scorep/SCOREP_User.inc>
-
     program runMARE2DEM
  
     use Occam  
@@ -7,7 +5,8 @@
     use mare2dem_global           ! for setting defaults and storing worker status array
     use mare2dem_io
     use mare2dem_input_data_params
-
+    use kx_io
+    
     implicit none
 
     logical         :: lFwdOnly             = .false.   ! use command line argument -F to set this to true. 
@@ -15,33 +14,29 @@
     logical         :: lSaveSensitivity     = .false.   ! use command line argument -FS to set this to true
     logical         :: lrunMARE2DEM, lCompJ = .false.
     real(8)         :: timeOffset, time0 ! Timer temp
-    integer         :: ierr, nproc, myID,iWorker !  Local MPI variables
+    integer         :: ierr, nproc, runm2d_myID,iWorker !  Local MPI variables
     character(12)   :: ctemp   
-#ifdef TRACE
-        SCOREP_USER_REGION_DEFINE(iteration)
-#endif 
  
 !
 ! Initialize MPI:
 !
     call mpi_init( ierr )
-#ifdef ONEITERATION
-            write(*,*) ' MARE2DEM ONE ITERATION ONLY '
-#else
-            write(*,*) ' MARE2DEM MULTIPLE ITERATION  '
-#endif
-
-
     
 !
 ! Start the timer:
 ! 
     call get_time_offset(0d0, time0)
     
+ !
+ ! Start the timer for em2dkx tracing
+ !
+    !if (lprintTrace_em2dkx) call cpu_time(t0_em2dkxTrace)
+    if (lprintTrace_em2dkx) t0_em2dkxTrace = MPI_Wtime()
+
 !
 ! Get each processor's rank:
 !
-    call mpi_comm_rank( mcomm, myID, ierr )
+    call mpi_comm_rank( mcomm, runm2d_myID, ierr )
 !
 ! For Intel math kernel library, set #threads to 1. Occam matrix routines will override this since they are done 
 ! after parallel MARE2DEM calls have finished: 
@@ -69,12 +64,12 @@
 !
 ! Launch the worker controllers:
 !
-    if (myID /= manager) call mpi_worker_controller
+    if (runm2d_myID /= manager) call mpi_worker_controller
 
 !
 ! Read in input files using the manager process:
 !
-    if (myID == manager) then 
+    if (runm2d_myID == manager) then
 
         if (lPrintBanner) call displayBanner()    
 
@@ -163,11 +158,10 @@
         
         
         endif
-        
+
         !
         ! Compute forward response:
-        ! 
-        
+        !
         call computeFwd( lCompJ, transformToBound(pm,lowerBound,upperBound,lBoundMe)) 
         
         ! Show the misfit  
@@ -214,27 +208,22 @@
         ! Initialize the inversion settings:
         !
         lrunMARE2DEM       = .true.
-
-
-
         
         !
         ! Run the main loop
         !
         do while (lrunMARE2DEM)
-          
-           currentIteration = currentIteration + 1
-
-#ifdef TRACE
-             SCOREP_USER_REGION_BEGIN( iteration, "iteration", SCOREP_USER_REGION_TYPE_COMMON )
-#endif
             
+            currentIteration = currentIteration + 1 
+            
+            ! EXPERIMENTAL: read again in the Original .poly file:
+            if ( lReuseRefine ) call readPoly
+
             !
             ! Compute an Occam iteration:
             !
-
              call computeOccamIteration(lSaveJacobian,lSaveSensitivity) 
-                       
+             
             !
             ! Write out the results:
             ! 
@@ -258,23 +247,12 @@
 
             endif
 
-#ifdef TRACE    
-            SCOREP_USER_REGION_END( iteration ) !end Instrumentation
-#endif
-
             !
             ! Check the convergence flag:
-            !
-            
-#ifdef ONEITERATION
-            if (.true.) then
+            ! 
+            if (convergenceFlag > 1) then
                 exit
             end if
-#else
-	    if (convergenceFlag > 1) then
-	        exit
-            end if
-#endif
 
         enddo
         

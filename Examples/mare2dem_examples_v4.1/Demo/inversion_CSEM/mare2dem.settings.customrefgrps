@@ -3,9 +3,10 @@ Tolerance (%):                    1  ! target solution accuracy (not guaranteed,
 !
 ! CSEM settings:
 !
-Transmitters per group:           10     ! set this <= 10
-CSEM receivers per group:         40    ! adjust to maximize cluster usage
-CSEM frequencies per group:       1     ! this should be 1, or no more than the number of freqs per decade if you want to lighten the load
+Transmitters per group:           25     ! set this <= 10 if no custom groups file is passed. set it to the max transmitters otherwise
+CSEM receivers per group:         40    ! adjust to maximize cluster usage. ignored if custom groups file is passed
+CSEM frequencies per group:       2     ! this should be 1 if no custom groups file is passed, or max frequencies otherwise
+CSEM custom groups file:          refgroups.settings     ! name of the custom ref. groups file
 Use mesh coarsening:              yes   ! Use a moving vertical window to simplify the mesh to the left and right of the transmitters
                                         ! and receivers in a given data subset. Only inversion parameters are coarsened and this is only done for CSEM
                                         ! modeling tasks. This can greatly speed up modeling of very long profiles of data.

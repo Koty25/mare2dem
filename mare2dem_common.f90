@@ -42,7 +42,7 @@
     character(256)  :: modelFileName    = ''      
     character(256)  :: penaltyFileName  = ''          
     character(256)  :: dataFileName     = ''
-    character(256)  :: settingsFileName = ''                 
+    character(256)  :: settingsFileName = ''
     real(8)         :: lowerBoundGlobal, upperBoundGlobal  ! There are used to initialize the bound arrays from module Occam
     character(256)  :: cParamHeader     = ''    ! This is not used by MARE2D, just passes thru to the output files.
 
@@ -56,15 +56,23 @@
 ! Variables that can be changed using optional inputs in the settings file:
 !
     logical         :: lprintDecomposition     = .true.   ! set to true to display the parallel decomposition settings                                            
-    logical         :: lprintMPItimers         = .true.  ! set to true to display timing info on MPI send and recv commands
-    logical         :: lPrintDebug             = .true.   
-    logical         :: lPrintSetup             = .true.   
-    logical         :: lPrintGroups            = .true.   ! prints all Fq, RxTx, Refinement and KxFq groups for debugging
-    logical         :: lSaveLoadBalanceTimers  = .true.   ! saves loadBalanceTimers.txt with load timers for each worker process    
-    logical         :: lSaveTaskTimers         = .true.   ! saves TaskTimer.txt with timers for each task   
+    logical         :: lprintMPItimers         = .false.  ! set to true to display timing info on MPI send and recv commands
+    logical         :: lPrintDebug             = .false.   
+    logical         :: lPrintSetup             = .false.   
+    logical         :: lPrintGroups            = .true.    ! prints all Fq, RxTx, Refinement and KxFq groups for debugging
+    logical         :: lSaveLoadBalanceTimers  = .true.    ! saves loadBalanceTimers.txt with load timers for each worker process
+    logical         :: lSaveTaskTimers         = .true.    ! saves TaskTimer.txt with timers for each task
     logical         :: lPrintData              = .true.    ! display data file when read in
     logical         :: lPrintBanner            = .true.    ! display banner at start
     
+!
+! Reuse refinements from previous forward calls (it reuses the ver first refined mesh for the moment)
+!
+    logical, public         :: lReuseRefine     = .false.
+    integer, public         :: maxnadapt_noamr  = 0         ! value of maxnadapt for no amr maxnadapt_default
+    integer, public         :: maxnadapt_default  = 30      ! default value of maxnadapt
+    integer, public         :: nbOccItToReuseRefine  = 1    ! Number of occam itterations to reuse refine
+
     integer         :: maxnadapt  = 30         ! maximum number of refinements        
     integer         :: nwave      = 30         ! # of wavenumbers for 2.5D Fourier transformation. 
     real(8)         :: loglower   = -5         ! log10 lower limit of wavenumbers
@@ -95,6 +103,11 @@
     integer         :: nFreqPerGroupCSEM = 1      ! number of frequencies to group together for mesh refinement
     integer         :: nFreqPerGroupMT   = 1      ! number of frequencies to group together for mesh refinement
     
+    ! Customized parameters for the refinement groups decomposition
+    character(256)      :: refGrpsFileName  = ''    ! Custom pre-computed refinement groups configuration file
+    integer             :: customNRrxGroups = 0     ! Custom number of receriver groups
+    integer, dimension(:),allocatable       :: customNbRxPerGroup    ! Number of receivers for each custom receiver group
+
     !
     ! For finite Tx and Rx dipoles we need to specify the quadrature order to use (can be overridden by mare2dem.settings file):
     !   
@@ -203,6 +216,8 @@
     if ( allocated( refinementGroups ) )    deallocate( refinementGroups )  
     if ( allocated( iFreeNewToOld ) )       deallocate( iFreeNewToOld )  
     if ( allocated( freeRegionCentroids ) ) deallocate( freeRegionCentroids )  
+
+    if ( allocated( customNbRxPerGroup ) ) deallocate( customNbRxPerGroup )
       
             
     end subroutine deallocate_mare2dem_global    
@@ -563,7 +578,18 @@
     nTxGroupsDC = 0
     if (nTxDC > 0 )  nTxGroupsDC = ceiling( dble(nTxDC) / dble(nTxPerGroupDC) )   
      
-    nRxGroupsCSEM     = ceiling( dble(nRxCSEM) / dble(nRxPerGroupCSEM) )   
+    if (customNRrxGroups > 0) then
+        if (lprintDebug) then
+            write(6,fmt='(a32,a3)') ' Using custom receiver groups configuration'
+        endif
+        nRxGroupsCSEM     = customNRrxGroups
+    else
+        if (lprintDebug) then
+            write(6,fmt='(a32,a3)') ' Using vanilla receiver groups configuration'
+        endif
+        nRxGroupsCSEM     = ceiling( dble(nRxCSEM) / dble(nRxPerGroupCSEM) )
+    endif
+    !nRxGroupsCSEM     = ceiling( dble(nRxCSEM) / dble(nRxPerGroupCSEM) )
     nRxGroupsMT       = ceiling( dble(nRxMT)   / dble(nRxPerGroupMT) )   
     nRxGroupsDC       = ceiling( dble(nRxDC)   / dble(nRxPerGroupDC) )  
     
@@ -583,11 +609,18 @@
         nt0     = (itxG-1)*nTxPerGroupCSEM               ! last input transmitter number from previous group
         ntxg    = min(nTxPerGroupCSEM, nTxCSEM - nt0)    ! number of transmitters in this group
  
+        nrx0 = 0
+        nrxg = 0
         do irxG = 1,nRxGroupsCSEM
-    
-            nrx0    =  (irxG-1)*nRxPerGroupCSEM                 ! last input receiver number from previous group or 0 if first group
-            nrxg    =  min(nRxPerGroupCSEM, nRxCSEM - nrx0 )    ! number of receivers in this group
             
+            if (customNRrxGroups == 0) then                         ! Using valilla ref groups configuration
+                nrx0    =  (irxG-1)*nRxPerGroupCSEM                 ! last input receiver number from previous group or 0 if first group
+                nrxg    =  min(nRxPerGroupCSEM, nRxCSEM - nrx0 )    ! number of receivers in this group
+            else                                                    ! Using custom ref groups configuration
+                nrx0    =  nrx0+nrxg                                ! last input receiver number from previous group or 0 if first group
+                nrxg    =  customNbRxPerGroup(irxG)                 ! number of receivers in this group                                                    ! Using customized ref groups configuration
+            endif
+
             !
             ! Insert arrays into RxTxGroups(iGroup):
             !
@@ -603,7 +636,7 @@
             
             allocate( RxTxGroups(iGroup)%iTx(ntxg) )
  
-            RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0    
+            RxTxGroups(iGroup)%iTx  = [1:ntxg] + nt0
              
             
             !
@@ -613,7 +646,11 @@
             
             allocate( RxTxGroups(iGroup)%iRx(nrxg) )
             
-            RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0    
+            !if (customNRrxGroups == 0) then                         ! Using valilla ref groups configuration
+                RxTxGroups(iGroup)%iRx  = [1:nrxg] + nrx0
+            !else                                                    ! Using custom ref groups configuration
+            !    RxTxGroups(iGroup)%iRx  = [nrx0+1:nrx0+1+nrxg]
+            !endif
  
         enddo
     enddo
@@ -1153,11 +1190,7 @@
  !
  ! Generate the data mask arrays which indicate which Rx,Tx,Freq combos have input data:
  !
-     write(*,*) 'antes nd: ',nd
-
      call getDataMasks
-
-     write(*,*) 'depois nd: ',nd
      
  !
  ! Use a first pass to count how many groups to allocate, then we use a second pass to allocate and insert:
@@ -1261,15 +1294,11 @@
 ! Point to first group:
 !
     iPtr_refGroups = 1
-
-    write(*,*) 'nd aqui1: ',nd
     
 !
 ! Lastly, create the local dp arrays for each refinement group:
 !    
     allocate( g2L_iFq(max(nFreqCSEM,nFreqMT,1)), g2L_iTx(max(nTxCSEM,nTxDC)), g2L_iRx(max(nRxCSEM,nRxMT,nRxDC)) )
-
-    write(*,*) 'nd aqui2: ',nd
 
     do iGrp = 1,nRefinementGroups
     
@@ -1289,9 +1318,9 @@
         fq0     = FqGroups(iFqG)%iFq(1)
         fq1     = FqGroups(iFqG)%iFq(nFq)
         
-        write(*,'(a,*(i,1x))') ' nRx,rx0,rx1: ', nRx,rx0,rx1
-        write(*,'(a,*(i,1x))') ' nTx,tx0,tx1: ', nTx,tx0,tx1
-        write(*,'(a,*(i,1x))') ' nFq,fq0,fq1: ', nFq,fq0,fq1
+!        write(*,'(a,*(i,1x))') ' nRx,rx0,rx1: ', nRx,rx0,rx1
+!        write(*,'(a,*(i,1x))') ' nTx,tx0,tx1: ', nTx,tx0,tx1
+!        write(*,'(a,*(i,1x))') ' nFq,fq0,fq1: ', nFq,fq0,fq1
 
         ! Get global to local mappings:
         g2L_iFq = 0
@@ -1346,12 +1375,6 @@
  
             ! Count number of input data for this group:
             ndCount = 0
-            write(*,*) 'fq0: ',fq0
-            write(*,*) 'fq1: ',fq1
-            write(*,*) 'tx0: ',tx0
-            write(*,*) 'tx1: ',tx1
-            write(*,*) 'rx0: ',rx0
-            write(*,*) 'rx1: ',rx1
             do iD = 1,nd
                 if ( (between(dp(iD,2),fq0,fq1)) .and. &
                    & (between(dp(iD,3),tx0,tx1)) .and. & 
@@ -1359,8 +1382,6 @@
                    if  (dp(iD,1)<100)  ndCount = ndCount + 1
                 endif
             enddo
-            write(*,*) 'Ver ndCount: ',ndCount
-            write(*,*) 'nd: ',nd
                     
         elseif (refinementGroups(iGrp)%sType == 'dc' ) then
  

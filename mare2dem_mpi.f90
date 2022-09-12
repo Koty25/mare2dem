@@ -79,10 +79,6 @@
     
     integer :: ierr,  iWorker, nProc 
 
-#ifdef TRACE
-    SCOREP_USER_REGION_DEFINE(iprobeMpiManager)
-#endif
-
     call mpi_comm_size( mcomm, nProc, ierr )  
          
 !
@@ -94,18 +90,13 @@
 
     call getRefinementGroups
     
-    call printDecomposition 
+    if (lprintDecomposition) call printDecomposition 
     
     if (lPrintSetup) call display_MARE2DEM_Params
     
 !
 ! Launch the manager controller:
 !
-
-#ifdef TRACE
-    SCOREP_USER_REGION_BEGIN( iprobeMpiManager, "iprobeMpiManager", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif
-
     do    
                 
         status = 0
@@ -113,14 +104,8 @@
         !
         ! Check for a message from any Worker:
         !
-
-#ifdef TRACE
-            SCOREP_RECORDING_OFF()
-#endif
         call  mpi_iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, mcomm, lflag, status, ierr)
-#ifdef TRACE
-            SCOREP_RECORDING_ON()
-#endif        
+        
         !
         ! If message from Worker, then decode it:
         !
@@ -165,11 +150,6 @@
      
         
     enddo ! manager controller loop
-
-#ifdef TRACE    
-    SCOREP_USER_REGION_END(iprobeMpiManager) !end Instrumentation
-#endif
-
 !        
 ! Done with the adaptive mesh refinements 
 !
@@ -272,7 +252,7 @@
     use kx_io
     use mare2dem_global
     use mare2dem_input_data_params
-    use Occam, only : d
+    use Occam, only : d,numForwardCalls,currentIteration
     
     implicit none
     
@@ -485,9 +465,15 @@
     call mpi_send( max_nsubrefine,    1, MPI_INTEGER,          iWorker, tag_M_SendingData, mcomm,ierr )
     call mpi_send( pct_refine,        1, MPI_DOUBLE_PRECISION, iWorker, tag_M_SendingData, mcomm,ierr )
     call mpi_send( reciprocityUsed,   4, MPI_CHARACTER,        iWorker, tag_M_SendingData, mcomm,ierr )  
-    
- 
-    
+
+    call mpi_send( numForwardCalls,   1, MPI_INTEGER, iWorker, tag_M_SendingData, mcomm,ierr )
+    call mpi_send( lReuseRefine,      1, MPI_LOGICAL, iWorker, tag_M_SendingData, mcomm,ierr )
+    call mpi_send( maxnadapt_default,   1, MPI_INTEGER, iWorker, tag_M_SendingData, mcomm,ierr )
+    !call mpi_send( t0_em2dkxTrace,  1, MPI_DOUBLE_PRECISION, iWorker, tag_M_SendingData, mcomm,ierr )
+    call mpi_send( lprintTrace_em2dkx,      1, MPI_LOGICAL, iWorker, tag_M_SendingData, mcomm,ierr )
+    call mpi_send( currentIteration,   1, MPI_INTEGER, iWorker, tag_M_SendingData, mcomm,ierr )
+    call mpi_send( nbOccItToReuseRefine,   1, MPI_INTEGER, iWorker, tag_M_SendingData, mcomm,ierr )
+       
     !
     ! Worker will then compute the 2D EM response and send its results back to the manager...
     !           
@@ -614,17 +600,7 @@
     !
     ! Determine which worker I am:
     !
-    
-#ifdef TRACE
-    SCOREP_USER_REGION_DEFINE(mpi_worker_control)
-    SCOREP_USER_REGION_DEFINE(iprobeMpi)	
-#endif
-    
     call mpi_comm_rank( mcomm, myID, ierr )
-
-#ifdef TRACE
-    SCOREP_USER_REGION_BEGIN( mpi_worker_control, "mpi_worker_control", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif
     
     !
     ! Create an infinite loop for this worker controller:
@@ -640,17 +616,7 @@
         !
         ! Check for a message from the manager:
         !
-        
-#ifdef TRACE
-       SCOREP_RECORDING_OFF()       
-    SCOREP_USER_REGION_BEGIN( iprobeMpi, "iprobeMpi", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif
         call  mpi_iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, mcomm, lflag, status, ierr)
-
-#ifdef TRACE    
-    SCOREP_USER_REGION_END(iprobeMpi) !end Instrumentation
-       SCOREP_RECORDING_ON()
-#endif
         
         !
         ! If no message from the manager, take a valium and try later:
@@ -659,9 +625,6 @@
             call sleepqq(1) ! kwk debug: this is specific to the intel compiler
             cycle
         endif
-
-
-
 #endif        
         !
         ! Get the command from the manager:
@@ -710,10 +673,6 @@
         end select
 
     enddo   ! the infinite while loop
-    
-#ifdef TRACE    
-    SCOREP_USER_REGION_END( mpi_worker_control ) !end Instrumentation
-#endif
     
     end subroutine mpi_worker_controller
     
@@ -837,6 +796,11 @@
     implicit none
  
     integer(8)  :: t0,t1
+
+    !SCOREP REGIONS DEFINITION
+#ifdef TRACE
+    SCOREP_USER_REGION_DEFINE(fwd_compute)
+#endif
   
     call system_clock(count_rate=clockRate)    
     call system_clock(t0)        
@@ -858,8 +822,15 @@
 !
 ! Compute the 2D EM response:
 !
+#ifdef TRACE
+    SCOREP_USER_REGION_BEGIN(fwd_compute, "fwd_compute", SCOREP_USER_REGION_TYPE_COMMON)
+#endif
     if (lprintDebug) write(*,*) '...call worker_EM2D   ',myid
     call worker_EM2D
+
+#ifdef TRACE
+    SCOREP_USER_REGION_END(fwd_compute)
+#endif
 !
 ! Send results back to the manager
 !
@@ -882,7 +853,7 @@
     use kx_io
     use mare2dem_global
     use mare2dem_input_data_params, only : phaseConvention, cnDataParams, reciprocityUsed
- 
+    use occam, only : numForwardCalls,currentIteration
     use mare2dem_worker
     
     implicit none
@@ -1112,6 +1083,14 @@
     case ('yes')
            lUseReciprocity = .true.          
     end select
+
+    call mpi_recv(numForwardCalls ,1, MPI_INTEGER, manager, tag_M_SendingData, mcomm, status, ierr )    
+    call mpi_recv(lReuseRefine    ,1, MPI_LOGICAL, manager, tag_M_SendingData, mcomm, status, ierr )
+    call mpi_recv(maxnadapt_default ,1, MPI_INTEGER, manager, tag_M_SendingData, mcomm, status, ierr )
+    !call mpi_recv(t0_em2dkxTrace, 1, MPI_DOUBLE_PRECISION, manager, tag_M_SendingData, mcomm, status, ierr )
+    call mpi_recv(lprintTrace_em2dkx    ,1, MPI_LOGICAL, manager, tag_M_SendingData, mcomm, status, ierr )
+    call mpi_recv(currentIteration ,1, MPI_INTEGER, manager, tag_M_SendingData, mcomm, status, ierr )
+    call mpi_recv(nbOccItToReuseRefine ,1, MPI_INTEGER, manager, tag_M_SendingData, mcomm, status, ierr )
     
     call cpu_time(tEnd)     
 

@@ -334,24 +334,27 @@
     ! Loop over query points (sites):
     !
     do i = 1,np
-       
+
+        !write(*,*) 'entering inner loop i=', i
         if ( ieee_is_nan(xp(i)) .or. ieee_is_nan(yp(i)) )  then
             write(*,*) 'error, findElement has a nan: ',i,xp(i), yp(i)
         endif
         qv(1) = xp(i)
         qv(2) = yp(i)
  
-         
+        !write(*,*) 'call kdtree2_n_nearest' 
         !
         ! Jump by finding nearest node:
         !
         call kdtree2_n_nearest(tp=tree,qv=qv,nn=1,results=results) 
-        
+
+        !write(*,*) 'accessing node2tri'
         !
         ! Get an element this node is incident on:
         !
         etest =  node2tri(results(1)%idx)
- 
+
+        
         !
         ! Now do a careful walk to find the element containing this point:
         !
@@ -364,13 +367,15 @@
             e0 = etest
             n0 = results(1)%idx
             inme = etest
-            
+
+            !write(*,*) 'call loopWalk'
             call loopWalk(etest,e0,n0, ne, emap, neigh, attr, inme )
                
             inelements(i) = inme
               
         else ! Find the nearby element containing the query point
-            
+
+            !write(*,*) 'call inElement ', node2tri 
             call inElement(etest, xp(i),yp(i), n,x,y, ne, emap, neigh, attr, inelements(i) )
             
         endif

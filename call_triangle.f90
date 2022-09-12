@@ -370,23 +370,27 @@
  ! .poly file:
  !
     open(16,file=trim(fileroot) //'.poly',status='REPLACE') 
-    write(16,*) 0, 2, 0, 1  ! no nodes for for the intermediate .poly file, nodes are in .node file
-    write(16,*) model%numberofsegments,1  ! segment heading   
+    !write(16,*) 0, 2, 0, 1  ! no nodes for for the intermediate .poly file, nodes are in .node file
+    write(16,'(i0,1x,i0,1x,i0,1x,i0)') model%nnod, 2, model%numberofpointattributes, 0 !TODO: define model%nbndmarkers to replace the 0
+    do i = 1,model%nnod
+         write(16,'(i0,1x,f0.3,1x,f0.3)') i, model%y(i),model%z(i)
+    enddo
+    write(16,'(i0,1x,i0)') model%numberofsegments,1  ! segment heading   
     do i = 1,model%numberofsegments
-        write(16,*) i,  model%segmentlist( 2*i-1),model%segmentlist( 2*i),model%segmentmarkerlist(i)
+        write(16,'(i0,1x,i0,1x,i0,1x,i0)') i,  model%segmentlist( 2*i-1),model%segmentlist( 2*i),model%segmentmarkerlist(i)
     enddo
     ! holes
-    write (16,*) model%numberofholes
+    write (16,'(i0)') model%numberofholes
     do i = 1,model%numberofholes
         !Following lines: <hole #> <x> <y>
         write(16,'(i0,1x,2(E22.14,1x))') i,model%holelist(2*i-1), model%holelist(2*i)
     enddo       
     ! regions:
-    write (16,*) model%numberofregions
+    write (16,'(i0)') model%numberofregions
     do i = 1,model%numberofregions
      
         !Following lines: <region #> <x> <y> attribute area_constraint
-        write(16,'(i0,1x,4(E22.14,1x))') i, model%regionlist(4*i - 3 : 4*i)
+        write(16,'(i0,1x,f0.3,1x,f0.3,1x,f0.3,1x,f0.3)') i, model%regionlist(4*i - 3 : 4*i)
     enddo               
 
     close(16)
@@ -464,6 +468,7 @@
         stop
     end if    
     read (10,*) model%nnod, iskip, model%numberofpointattributes, nbndmarkers
+    !write(*,*) model%nnod
   !  write(*,*) 'model%nnod, iskip, model%numberofpointattributes, nbndmarkers:',model%nnod, iskip, &
   !             & model%numberofpointattributes, nbndmarkers
     
@@ -472,7 +477,8 @@
         call read_mesh(fileroot,model)  ! Read in nodes and elements from <fileroot>.node and <fileroot>.ele files
         ! allocates ypoint and zpoint arrays and fills them in
         ! allocates attr and emap and fills them in.
-    else
+     else
+        !write(*,*) 'check1'
         model%nele = 0
         model%numberofcorners  = 3
         model%numberoftriangleattributes = 1
@@ -495,61 +501,72 @@
                read(10,*) iskip, model%y(i),model%z(i), &
                         & ( model%pointattributelist((i-1)*npa+j) , j=1,npa) , &
                         & ( model%pointmarkerlist(i), j = 1,nbndmarkers)  ! nbndmarkers = 0|1
-            
         enddo
     endif 
     
     allocate (model%area(model%nele) )
 
+    !write(*,*) 'check2'
     !
     ! Read in segments:
     !
     read (10,*) model%numberofsegments, nbndmarkers
+    !write(*,*) model%numberofsegments
     !write(*,*) 'model%numberofsegments, nbndmarkers:',model%numberofsegments, nbndmarkers
     ! allocate segment sized arrays:
     allocate ( model%segmentlist(model%numberofsegments*2))
-    allocate (model%segmentmarkerlist(model%numberofsegments) ) 
+    allocate (model%segmentmarkerlist(model%numberofsegments) )
+    !write(*,*) 'check2.1'
     if (nbndmarkers > 0 ) then
         do i = 1,model%numberofsegments
            !Following lines: <segment #> <endpoint> <endpoint> [boundary marker]
-            read(10,*) iskip,  model%segmentlist(2*i-1), model%segmentlist(2*i) , model%segmentmarkerlist(i)
+           read(10,*) iskip,  model%segmentlist(2*i-1), model%segmentlist(2*i) , model%segmentmarkerlist(i)
+          !write(*,*) 'check2.1' ,i
            !  write(*,*) 'segs:', i,  model%segmentlist(2*i-1), model%segmentlist(2*i) 
-        enddo
+         enddo
+    !write(*,*) 'check2.2'     
     else
         do i = 1,model%numberofsegments
            !Following lines: <segment #> <endpoint> <endpoint> [boundary marker]
             read(10,*) iskip,  model%segmentlist(2*i-1), model%segmentlist(2*i) 
         enddo
     endif           
-        
+
+    !write(*,*) 'check3'
     !
     ! Read in the holes:
     !
     read (10,*) model%numberofholes
-    
+
+    !write(*,*) model%numberofholes
     allocate (model%holelist(2*model%numberofholes) )
     do i = 1,model%numberofholes
         !Following lines: <hole #> <x> <y>
         read(10,*) iskip,model%holelist(2*i-1), model%holelist(2*i)
     enddo       
-    
+
+    !write(*,*) 'check4'
     !
     ! Read in regions:
     !
     read (10,*) model%numberofregions
+    !write(*,*) model%numberofregions
     allocate (  model%regionlist(model%numberofregions*4 ) )
     do i = 1,model%numberofregions
      
         !Following lines: <region #> <x> <y> attribute area_constraint
-        read(10,*) iskip, model%regionlist(4*i - 3 : 4*i)
+       read(10,*) iskip, model%regionlist(4*i - 3 : 4*i)
+       !write(*,*) iskip, model%regionlist(4*i - 3 : 4*i)
+      ! write(*,*) 'check4.1',i
     enddo           
- 
+
+    !write(*,*) 'check5'
     !
     ! Close the file:
     !
     close(10)
- 
-    
+
+       
     end subroutine read_triangle
     
 !======================================================================! 

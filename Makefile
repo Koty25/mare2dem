@@ -38,7 +38,7 @@ else ifeq (,$(wildcard $(INC_FILE))) # ifneq (,$(wildcard $(INC_FILE)))
     MARE2DEM: display_Error_IncludeNotFound display_UsageMsg
 else 
     include $(INC_FILE)
-    MARE2DEM: disp build_mare2dem build_mare2dem_lib;
+    MARE2DEM: disp build_mare2dem;
 endif
 
 
@@ -160,8 +160,8 @@ disp:
 mare2dem_core = em_constants.o kdtree2.o fem2d_utilities.o  binarytree.o  call_triangle.o sort.o \
 			  c_fortran_zgssv.o  superlu_zsolver.o intelmkl_solver.o quad.o\
 			  string_helpers.o triangle.o mt1d.o kx_io.o em2dkx.o dc2dkx.o mare2dem_scalapack.o occam.o\
-		      c_fortran_triangle.o filtermodules.o   \
-		      mare2dem_common.o  spline_kx_module.o mare2dem_worker.o mare2dem_io.o \
+		     mare2dem_common.o c_fortran_triangle.o filtermodules.o   \
+		      spline_kx_module.o mare2dem_worker.o mare2dem_io.o \
 		      mare2dem_mpi.o em2d.o
 		      
 mare2dem_exe =  $(mare2dem_core) runmare2dem.o 
@@ -209,9 +209,6 @@ triangle.o:  triangle.c  triangle.h
 #
 # General Fortran compile:
 %.o: %.f90 
-	$(FC) $(FFLAGS) -c -o $@ $^
-
-%.o: %.F90 
 	$(FC) $(FFLAGS) -c -o $@ $^
 
 # General C compile:

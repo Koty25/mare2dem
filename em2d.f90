@@ -47,7 +47,28 @@
 ! Local variables:
 !
     integer :: i 
- 
+
+!
+! Use default amr setting for fwd call inside computeJacobian (bdopartials == .true.). No need to chance maxnadapt
+! Use no amr (maxnadapt_noamr) otherwise and don't save the meshes
+!
+    ! non computeJacobian call
+    if ( lReuseRefine .and. (bDoPartials == .false.)) then
+       maxnadapt = maxnadapt_noamr
+       lSaveMeshFiles = .false.
+    endif
+    !computeJacobian call
+    if ( lReuseRefine .and. (bDoPartials == .true.)) then
+       ! Check if this computeJacobian call will reuse refine
+       if (mod(currentIteration,nbOccItToReuseRefine) > 0) then
+           !disable amr and save meshes (enable intra occam iteration reuse refine)
+           maxnadapt = maxnadapt_noamr
+           lSaveMeshFiles = .false.
+       else
+           maxnadapt = maxnadapt_default
+           lSaveMeshFiles = .true.
+       endif
+    endif
 !
 ! Copy the model parameters (log10(resistivity)) in currentMod into the resistivity array used by the fwd code:
 !   

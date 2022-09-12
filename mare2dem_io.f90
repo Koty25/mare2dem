@@ -29,7 +29,7 @@
     use mare2dem_global
     use mare2dem_input_data_params
     use Occam 
-         
+
     implicit none
     
     private
@@ -39,6 +39,7 @@
     public :: displayBanner
     public :: readModel
     public :: readData
+    public :: readPoly
     ! public :: writeResponse
 !     public :: writeJacobian
 !     public :: writeSensitivity
@@ -1035,7 +1036,8 @@
     modelFileName = adjustl(modelFileName)
     idot = index(modelFileName,'.',.true.)
     filename = modelFileName(1:idot-1)
- 
+
+    if ( allocated( inputmodel%attr ) ) call deallocate_trimesh(inputmodel,.false.)
     call read_triangle(filename,inputmodel)
     write(*,*) 'Done reading Poly file'
     write(*,*) ' '
@@ -1121,7 +1123,6 @@
 !==================================================================================================================================!      
     subroutine readSettings  
  
-    
     integer             :: err, iLine = 0
     character(256)      :: sLine, sCode, sValue 
     logical             :: bComment
@@ -1179,6 +1180,7 @@
         case ('max # refinement','max # refinements') 
         
             read(sValue,*) maxnadapt
+            maxnadapt_default = maxnadapt
         
         case ('tolerance (%)','tolerance')
         
@@ -1209,6 +1211,19 @@
             case ('yes')
               lSaveMeshFiles = .true.
             end select  
+        ! lReuseRefine
+        case ('reuse refine')
+            select case (trim(sValue))
+            case ('yes')
+               lReuseRefine   = .true.
+               lSaveMeshFiles = .true.
+            end select
+
+        case ('number of occam iterations to reuse refine')
+            read(sValue,*) nbOccItToReuseRefine
+            if (nbOccItToReuseRefine == 0) then
+                nbOccItToReuseRefine = 1
+            endif
 
         case ('dual function')
 
@@ -1246,6 +1261,8 @@
         case ('mt frequencies per group')         
             read(sValue,*) nFreqPerGroupMT 
 
+        case ('csem custom groups file')
+            read(sValue,*) refGrpsFileName
 
         case (' (Co)Sine Transform Filters','ct filters','ct filter','ctfilters','ctfilter')
 
@@ -1294,7 +1311,23 @@
                 lprintData              = .false.
                 lprintGroups            = .false.
                 lDisplayRefinementStats = .false.
+                lprintTrace_em2dkx      = .false.
                 
+            end select
+
+        case ('print em2dkx trace')
+            select case (trim(sValue))
+            case ('yes')
+                !lprintDebug             = .false.
+                !lprintDebug_em2dkx      = .false.
+                !lprintDebug_dc2dkx      = .false.
+                !lprintSetup             = .false.
+                !lprintDecomposition     = .false.
+                !lprintData              = .false.
+                !lprintGroups            = .false.
+                !lDisplayRefinementStats = .false.
+                lprintTrace_em2dkx      = .true.
+
             end select            
 
         case ('print data')
@@ -1408,6 +1441,88 @@
     write(*,*) ' '
  
     end subroutine readSettings
+
+!==================================================================================================================================!
+!===================================================================================================================== readRefGroups
+!==================================================================================================================================!
+    subroutine readRefGroups
+
+    integer             :: err, iAllocErr, rxStartIdx = 1, iLine = 0
+    character(256)      :: sLine, sCode, sValue
+    logical             :: bComment
+
+    write(6,*) '========== Reading in Custom Refinement Group Settings =========='
+    write(*,*) ' '
+    call print2col32('Reading ref. Groups file:  ',refGrpsFileName,6)
+    write(*,*) ' '
+
+    open (unit=90,file=refGrpsFileName,status='old',iostat=err)
+    if (err .ne. 0) then
+        write(*,*) ' Error opening ref. groups settings file',refGrpsFileName, ')'
+        call exitMARE2DEM
+    end if
+
+    ! Read in the file a line at a time and decode the sCode/sValue pairs that are separated by a semicolon
+    ! Certain sCodes are followed by lists such as model parameters, site locations, etc.
+    ! Parsecode is D Myer's useful code tidebit for separating sCode and sValue pairs
+
+    do  ! infinite while loop
+
+      ! Get the next code/value pair
+        ! ParseCode forces the code portion to be all lowercase with no
+        !   padding and ending colon stripped off.  User comments are
+        !   stripped from the value portion.
+
+        read( 90, '(A)', iostat = err ) sLine
+
+        if (err /= 0) exit  ! end of file read, escape from while loop and
+                            ! proceed to checking that required inputs defined
+
+        iLine = iLine + 1   ! advance line counter
+
+        call ParseCode(  sLine, sCode, sValue, bComment )
+        if( bComment ) cycle
+
+        !
+        ! What do we have?
+        !
+        select case (trim(sCode))
+
+          case ('custom number of receiver groups')
+            read(sValue,*) customNRrxGroups
+            allocate (customNbRxPerGroup(customNRrxGroups), stat=iAllocErr)  ! Allocate ref groups start array
+            if (iAllocErr .ne. 0) then
+                write(*,*) ' Out of memory.  Too many custom refinement groups (', customNRrxGroups, ')'
+                call exitMARE2DEM
+            endif
+
+          case ('group number of recceivers')
+            if (customNRrxGroups == 0) then
+                write(*,*) ' Error: custom number of receiver groups not set before setting receiver group start indices'
+                call exitMARE2DEM
+            endif
+            read(sValue,*) customNbRxPerGroup(rxStartIdx)
+            if (lprintDebug) then
+                write(6,fmt='(a32,a3)') ' customNbRxPerGroup (', customNbRxPerGroup(rxStartIdx), ')'
+            endif
+            rxStartIdx = rxStartIdx + 1
+
+          case default
+            write(*,*) 'Error reading RUNFILE file!'
+            write(*,*) ' On line :', iLine
+            write(*,*) 'Unknown or unsupported code:'
+            write(*,*) sCode
+
+            call exitMARE2DEM
+
+        end select
+
+    enddo ! read while loop
+
+    write(*,*) 'Done reading custom ref. groups settings file '
+    write(*,*) ' '
+
+    end subroutine readRefGroups
     
 !==================================================================================================================================! 
 !========================================================================================================================= readModel
@@ -1428,6 +1543,11 @@
     
 ! Step 4: read the MARE2DEM settings file:
     call readSettings
+
+! Step 5: read the custom refinement groups file:
+    if (refGrpsFileName /= '') then
+        call readRefGroups
+    endif
 ! 
 !  Check boundary model for slivers
 !

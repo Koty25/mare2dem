@@ -33,10 +33,17 @@
 !
 !==================================================================================================================================! 
 !======================================================================================================================== em2dkx_mod
-!==================================================================================================================================!  
-#include <scorep/SCOREP_User.inc>
-   
+!==================================================================================================================================!     
     module em2dkx_mod 
+
+!
+! Using MPI here for MPI_Wtime()
+!
+#if defined (_WIN32) || defined (WIN32) || defined (_WIN64) || defined (WIN64)
+    include 'mpif.h'
+#else
+    use mpi
+#endif
 
     use EM_constants
         
@@ -177,7 +184,7 @@
     type (trimesh) :: newmesh   ! temp storage for new adaptive meshes 
     
     integer :: isubset,iRefinementGrp
-    
+    integer :: iForwardCall,iOccamIteration
                    
     contains
 
@@ -186,7 +193,7 @@
 !==================================================================================================================================! 
 !============================================================================================================================ em2dkx
 !==================================================================================================================================!
-    subroutine em2dkx(iRefinementGrp_in,isubset_in,lrefine)   
+    subroutine em2dkx(iRefinementGrp_in,isubset_in,lrefine,numForwardCalls_in,currentIteration_in)   
 !
 ! The main subroutine for computing the 2.5D EM fields in the kx domain
 ! for the input transmitter, receivers, frequency, wavenumber and mesh.
@@ -201,12 +208,15 @@
  
     implicit none
     
-    integer, intent(in) :: isubset_in,iRefinementGrp_in
+    integer, intent(in) :: isubset_in,iRefinementGrp_in,numForwardCalls_in,currentIteration_in
     logical             :: lrefine
     real(8)             :: maxRelDiff, time
-        
+    character(256)      :: filename, cadapt
+    
     if (lprintDebug_em2dkx) write(*,*) myID,': entered em2dkx...'     
 
+    ! EXPERIMENTAL: dealocating everything that was possibly allocated earlier
+    !if ( allocated(node2tri) ) call em2dkx_deallocate
 !
 ! Initialize a few things:
 !
@@ -215,6 +225,8 @@
     lConverged     = .false.    
     isubset        = isubset_in
     iRefinementGrp = iRefinementGrp_in
+    iForwardCall   = numForwardCalls_in
+    iOccamIteration= currentIteration_in
     
 !
 ! First do local refinement around Rx and Tx region:
@@ -236,24 +248,28 @@
     !
     ! Initializations:
     !
-        call cpu_time(t0)
+        !call cpu_time(t0)
+        t0 = MPI_Wtime()
     
         call em2dkx_initialize
- 
-        call cpu_time(t1)
+
+        t1 = MPI_Wtime()
+        !call cpu_time(t1)
     
     !
     ! Set up dipoles
     !    
         call get_finite_dipoles
         
-        call cpu_time(t2)
+        t2 = MPI_Wtime()
+        !call cpu_time(t2)
     !
     ! Get element based lists (for node2tri, Rx and Tx locations):
     !        
         call get_element_lists
         
-        call cpu_time(t3)
+        t3 = MPI_Wtime()
+        !call cpu_time(t3)
     
     !
     ! Generate the node labels and boundary condition flags for nodes on mesh boundaries
@@ -261,54 +277,63 @@
     
         call gen_nodlab  
         
-        call cpu_time(t4)
+        t4 = MPI_Wtime()
+        !call cpu_time(t4)
 
         call gen_bcnod   
         
-        call cpu_time(t5)  
+        t5 = MPI_Wtime()
+        !call cpu_time(t5)
 
     !
     ! Generate LHS matrix, rhs source vectors and solve the linear system(s):
     !
         call gen_lhs 
     
-        call cpu_time(t6)
+        t6 = MPI_Wtime()
+        !call cpu_time(t6)
     
         call gen_rhs
     
-        call cpu_time(t7)
+        t7 = MPI_Wtime()
+        !call cpu_time(t7)
      
         call solve_primal
         
-        call cpu_time(t8)
+        t8 = MPI_Wtime()
+        !call cpu_time(t8)
         
     !
     ! Extract solution at receivers:
     !    
         call fill_solmtx  
         
-        call cpu_time(t9)
+        t9 = MPI_Wtime()
+        !call cpu_time(t9)
         
     !
     ! Check for solution convergence:
     !    
         call checkConvergence(maxRelDiff,lrefine)
 
-        call cpu_time(t10)
+        t10 = MPI_Wtime()
+        !call cpu_time(t10)
                 
     !    
     ! Compute error estimator and refine mesh if needed: 
     !
         if (.not.lConverged)  call estimateerror()
 
-        call cpu_time(t20)         
+        t20 = MPI_Wtime()
+        !call cpu_time(t20)
 
     !
     ! If requested, compute the adjoint partial derivatives:
     !    
         if ( lCompDerivs .and. lConverged )  call comp_adj_derivs      
 
-        call cpu_time(t21)
+        t21 = MPI_Wtime()
+        !call cpu_time(t21)
     !
     ! Display timing info:
     !
@@ -318,7 +343,10 @@
     ! Display iteration stats:
     !  
         time = t21 - t0
-        if (lDisplayRefinementStats) call displayRefinementStats_em2dkx(iRefinementGrp, isubset, meshnumber,lConverged, & 
+        if (lDisplayRefinementStats) call displayRefinementStats_em2dkx(iRefinementGrp, isubset, meshnumber,lConverged, &
+                                         & oldNumNodes,newNumNodes,maxerr,maxRelDiff,time)
+
+        if (lprintTrace_em2dkx) call em2dkx_printTrace(iRefinementGrp, isubset, meshnumber,lConverged,lCompDerivs, &
                                          & oldNumNodes,newNumNodes,maxerr,maxRelDiff,time)
             
     !
@@ -328,6 +356,12 @@
         if (lmadeNewMesh) then
             call deallocate_trimesh(mesh,.false.)
             call copy_trimesh( newmesh, mesh )
+            if (lSaveMeshFiles) then
+                write(cadapt,'(i6)') meshnumber
+                cadapt = adjustl(cadapt)
+                filename  = trim(fileroot)//'.'//trim(cadapt)
+                call write_triangle(newmesh,filename)
+            endif
         endif
         call deallocate_trimesh(newmesh,.false.)
         
@@ -361,14 +395,6 @@
     integer         :: e, irefine,iTx 
     character(256)  :: filename, cadapt
     
-#ifdef TRACE
-    SCOREP_USER_REGION_DEFINE(error_estimate)
-	
-    SCOREP_USER_REGION_BEGIN( error_estimate, "error_estimate", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif
-    
-
-    
     if (lprintDebug_em2dkx) write(*,*) myID,': errorindicator...'
   
     !
@@ -396,12 +422,14 @@
 !       
     if (lprintDebug_em2dkx) write(*,*) myID,': gen_rhs_bump_F ...'
     call gen_rhs_bump_F 
-    call cpu_time(t11)
+    t11 = MPI_Wtime()
+    !call cpu_time(t11)
     
     if (lprintDebug_em2dkx) write(*,*) myID,': gen_rhs_bump_B(0) ...'  
     call gen_rhs_bump_B(0)  
     
-    call cpu_time(t12)    
+    t12 = MPI_Wtime()
+    !call cpu_time(t12)
     
 !
 ! Generate LHS matrix in bump space:
@@ -410,13 +438,15 @@
  
     call gen_lhs_bump
     
-    call cpu_time(t13)
+    t13 = MPI_Wtime()
+    !call cpu_time(t13)
 !
 ! Solve the linear system using either SuperLU or Intel MKL solver (PARDISO)
 !
     call solve_varepsilon(1)
 
-    call cpu_time(t14)
+    t14 = MPI_Wtime()
+    !call cpu_time(t14)
  
 !
 ! Compute goal oriented error estimator:
@@ -429,7 +459,8 @@
 
     call gen_rhs_dual  
     
-    call cpu_time(t15)
+    t15 = MPI_Wtime()
+    !call cpu_time(t15)
     
     call solve_dual 
 
@@ -443,7 +474,8 @@
         enddo        
     endif
         
-    call cpu_time(t16)
+    t16 = MPI_Wtime()
+    !call cpu_time(t16)
  
  !
  ! 2.  Approximate dual error in bump basis
@@ -452,14 +484,16 @@
 
     call gen_rhs_bump_B(1)     
 
-    call cpu_time(t17)   
+    t17 = MPI_Wtime()
+    !call cpu_time(t17)
        
  !      
  ! 3. Solve linear system for \delta_h:
  !
     call solve_varepsilon(2) 
 
-    call cpu_time(t18)  
+    t18 = MPI_Wtime()
+    !call cpu_time(t18)
    
  !
  ! 4. Compute local error estimate
@@ -473,7 +507,7 @@
         
         call comp_drw_error_proj()  
         
-        if ( (irefine == 1 ).and.lSaveMeshFiles) then
+        if (lSaveMeshFiles) then
         
             write(cadapt,'(i6)') meshnumber  
             cadapt = adjustl(cadapt)    
@@ -546,7 +580,8 @@
         endif        
 
     enddo
-    call cpu_time(t19)
+    t19 = MPI_Wtime()
+    !call cpu_time(t19)
 
  !
  ! Deallocate dual array
@@ -582,11 +617,6 @@
     if (allocated(col_q))    deallocate (col_q)
     if (allocated(irw_q))    deallocate (irw_q)
     
-#ifdef TRACE
-    SCOREP_USER_REGION_END(error_estimate)
-#endif
-    
-    
     end subroutine estimateerror    
     
 !==================================================================================================================================! 
@@ -615,13 +645,6 @@
     real(8)                 :: jax,jay,jaz,max,may,maz
  
     complex(8), dimension(:), allocatable :: ex1dmt,hx1dmt
-    
-#ifdef TRACE
-    SCOREP_USER_REGION_DEFINE(derivs_comp_adj)
-	
-    SCOREP_USER_REGION_BEGIN( derivs_comp_adj, "derivs_comp_adj", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif
-    
 
     if (lprintDebug_em2dkx) write(*,*) myID,': comp_adj_derivs...'     
 !
@@ -936,11 +959,6 @@
     deallocate(rhs_wh)
                 
     if (allocated(ex1dmt)) deallocate(ex1dmt,hx1dmt)
-    
-#ifdef TRACE
-    SCOREP_USER_REGION_END(derivs_comp_adj)
-#endif     
-
 
     end subroutine comp_adj_derivs
   
@@ -1372,6 +1390,97 @@
           
     end subroutine em2dkx_deallocate  
     
+
+!==================================================================================================================================!
+!============================================================================================================ em2dkx_printTrace
+!==================================================================================================================================!
+    subroutine em2dkx_printTrace( iRefinementGrp,isubset, meshnumber,lconv,lCompDerivs, oldnodes,newnodes,sumerr,maxRelDiff,time)
+
+    integer :: meshnumber, oldnodes, newnodes,isubset,iRefinementGrp,nnodes
+    real(8) :: sumerr, time,maxRelDiff
+    logical :: lconv, lCompDerivs
+
+    character(256) :: sFmt
+    character(32)  :: snewnodes, status, stime, smaxRelDiff
+    character(14)  :: smaxerr
+
+    status = 'adaptive'
+
+    if (sumerr >= 0) then
+        if ( sumerr > 0 ) then
+             write(smaxerr,'(a2,2x,g9.2)') 'G:',sumerr
+        else
+            smaxerr = ' '
+        endif
+        if ( (maxRelDiff < 1d10 ) .and. (maxRelDiff > 0d0 ) ) then
+            write(smaxRelDiff,'(a9,2x,g9.2,1x,a1)') 'max(Rel):',maxRelDiff*1d2,'%'
+        else
+             smaxRelDiff = ' '
+        endif
+        if (lconv) then
+            status = 'converged'
+            smaxerr = ' '
+        endif
+
+    elseif (sumerr == -2d0) then
+        status = 'local' ! special flag for local refinement mode
+        smaxerr = ' '
+        smaxRelDiff = ' '
+     elseif (sumerr == -1d0) then
+        status = 'shared' ! special flag for local refinement mode
+        smaxerr = ' '
+        smaxRelDiff = ' '
+        !lconv = .false.
+    else
+        smaxerr = ' '
+        smaxRelDiff = ' '
+    endif
+
+    if (newnodes > 0) then
+        nnodes = newnodes
+    else
+        nnodes = oldnodes
+    endif
+
+    ! outputformat: myID,iOccamIteration,iFowardCall,iRefinementGrp,isubset,meshnumber,status,nnodes,regionname,start,end
+    !sFmt = '(i4,a,i4,a,i4,a,i4,a,i4,a32,a,a32,a,f8.4,a,f8.4)'
+    sFmt = '(i0,a,i0,a,i0,a,i0,a,i0,a,i0,a,a,a,i0,a,a,a,f0.9,a,f0.9)'
+    
+    !print timers for each call inside em2dkx
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','em2dkx_initialize',',',t0,',',t1
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','get_finite_dipoles',',',t1,',',t2
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','get_element_lists',',',t2,',',t3
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','gen_nodlab',',',t3,',',t4
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','gen_bcnod',',',t4,',',t5
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','gen_lhs',',',t5,',',t6
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','gen_rhs',',',t6,',',t7
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','solve_primal',',',t7,',',t8
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','fill_solmtx',',',t8,',',t9
+    write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','checkConvergence',',',t9,',',t10
+
+    !
+    ! Checking for convergence since not always em2dkx enters on error estimate
+    ! It does not enter when the mesh converges
+    !
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_gen_rhs_bump_F',',',t10,',',t11
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_gen_rhs_bump_B',',',t11,',',t12
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_gen_lhs_bump',',',t12,',',t13
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_solve_varepsilon(1)',',',t13,',',t14
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_gen_rhs_dual',',',t14,',',t15
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_solve_dual',',',t15,',',t16
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_gen_rhs_bump_G',',',t16,',',t17
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_solve_varepsilon(2)',',',t17,',',t18
+    if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror_local_error_estimate',',',t18,',',t19
+    !if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','estimateerror',',',t10,',',t20
+
+    !
+    ! Using the same if logic as to when comp_adj_derivs is called
+    !
+    if ( lCompDerivs .and. lconv ) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','comp_adj_derivs',',',t20,',',t21
+    !if (.not.lconv) write(*,sFmt) myID,',',iOccamIteration,',',iForwardCall,',',iRefinementGrp,',',isubset,',',meshnumber,',',trim(status),',',nnodes,',','total',',',t0,',',t21
+
+    end subroutine em2dkx_printTrace
+
 !==================================================================================================================================! 
 !================================================================================================================ em2dkx_printTimers
 !==================================================================================================================================! 
@@ -1422,14 +1531,6 @@
     character(256)      :: cadapt, filename          
     real(8), dimension(:,:), allocatable :: yz
     real(8) :: tstart,tend
-    
- 
-#ifdef TRACE
-	SCOREP_USER_REGION_DEFINE(em2dkx_localRefinement)
-	SCOREP_USER_REGION_BEGIN( em2dkx_localRefinement, "em2dkx_localRefinement", SCOREP_USER_REGION_TYPE_COMMON)
-#endif
-            
-
             
     if (lprintDebug_em2dkx) write(*,*) myID,': entered localRefinement_em2dkx...'            
     
@@ -1485,22 +1586,26 @@
             call getSigs(e,sigx,sigy,sigz)
             sigTemp(e) = dble(sigx+sigy+sigz)/3d0
         enddo
-
+        
         allocate (node2tri(mesh%nnod))
-        call getNode2Tri( mesh%nele, mesh%emap,mesh%nnod, node2tri)                
- 
+        call getNode2Tri( mesh%nele, mesh%emap,mesh%nnod, node2tri)
+        if (lprintDebug_em2dkx) write(*,*) 'mesh%nele ', mesh%nele
+        if (lprintDebug_em2dkx) write(*,*) 'mesh%nnod ', mesh%nnod
+
         allocate(yz(2,size(mesh%y)))   
         yz(1,:) = mesh%y
         yz(2,:) = mesh%z    
         treeNodes => kdtree2_create( yz, sort=.true.,rearrange=.true.) 
         deallocate(yz)        
         nullify(treeNodes%the_data) 
-                  
+        if (lprintDebug_em2dkx) write(*,*) 'local refinement loop, checkpoint 1'
+        
         do iRx = 1,nRx
   
             call findElement(treeNodes, mesh%nnod, mesh%y, mesh%z, mesh%nele, mesh%emap, mesh%neighborlist, node2tri, &
             & sigTemp, 1, yRx(iRx), zRx(iRx), inele)
- 
+
+            if (lprintDebug_em2dkx) write(*,*) 'local refinement loop, checkpoint 1.2'
             call getArea(inele(1),area,0) 
  
             call getSkinDepth(inele(1),skinDepth,0,.false.)
@@ -1512,7 +1617,8 @@
                 
             endif
             
-        enddo      
+         enddo
+         if (lprintDebug_em2dkx) write(*,*) 'local refinement loop, checkpoint 2'
     
         deallocate (sigTemp,node2tri)
         call kdtree2_destroy(treeNodes)
@@ -1668,14 +1774,8 @@
     if (lprinttimers)  write(*,'(i4,1x,a32,1x,f8.4)') myID,' em2dkx localRefinement_em2dkx:    ',tend-tstart
  
     if (lDisplayRefinementStats) call displayRefinementStats_em2dkx(iRefinementGrp,isubset,meshnumber,.false., &
-                                             & oldnodes,newnodes,-2d0,-2d0, tend-tstart)
-                                             
+                                         & oldnodes,newnodes,-2d0,-2d0, tend-tstart)
 
-                                       
-#ifdef TRACE
-    SCOREP_USER_REGION_END(em2dkx_localRefinement)
-#endif 
-                                        
     end subroutine localRefinement_em2dkx
   
 !==================================================================================================================================! 
@@ -3896,13 +3996,7 @@
 ! Kerry Key
 ! Scripps Institution of Oceanography
 !
-
-#ifdef TRACE
-	SCOREP_USER_REGION_DEFINE(lhs_gen)
-	SCOREP_USER_REGION_BEGIN( lhs_gen, "lhs_gen", SCOREP_USER_REGION_TYPE_COMMON)
-#endif
-
-
+ 
     if (sType == 'mt') then ! MT using decoupled linear systems:
     
         kx = 0d0 ! Make sure kx=0    
@@ -3911,9 +4005,7 @@
         call gen_lhs_csem
     endif
     
-#ifdef TRACE
-    SCOREP_USER_REGION_END(lhs_gen)
-#endif  
+   
 
     end subroutine gen_lhs        
 
@@ -4991,12 +5083,6 @@
 
     integer :: iTx
     
-#ifdef TRACE
-    SCOREP_USER_REGION_DEFINE(primal_solve)
-	
-    SCOREP_USER_REGION_BEGIN( primal_solve, "primal_solve", SCOREP_USER_REGION_TYPE_COMMON ) 
-#endif 
-    
     if (lSaveLinearSystem) call write_Ab
              
     if (sType == 'cs') then ! CSEM dipole
@@ -5037,9 +5123,7 @@
                       
     end if
 
-#ifdef TRACE    
-    SCOREP_USER_REGION_END( primal_solve ) !end Instrumentation
-#endif
+    
                  
     end subroutine solve_primal   
                     
